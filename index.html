@@ -12,27 +12,24 @@
 
     /* ═══════════════════════════════════════════════════════
        BRAND COLORS
-       To match your Framer site, replace the 6 hex values below.
-       How to find your colors: In Framer, click any colored element
-       → check the Fill panel on the right → copy the hex code.
+       To match your Framer site, replace the hex values below.
+       In Framer: click any colored element → Fill panel → copy hex.
        ═══════════════════════════════════════════════════════ */
     :root {
-      --primary:    #d3ad78;   /* header bar, buttons, section labels  */
-      --primary-dk: #8c7049;   /* button hover                         */
-      --accent:     #a07850;   /* "clear signature" link               */
-      --bg:         #f6f2ed;   /* page + consent box background        */
-      --border:     #ddd5ca;   /* dividers and field underlines        */
-      --text:       #2e2e2e;   /* body text                            */
-      --text-muted: #777777;   /* secondary / hint text                */
-      --surface:    #ffffff;   /* card background                      */
+      --primary:    #3d6b5e;
+      --primary-dk: #2c4f45;
+      --accent:     #a07850;
+      --bg:         #f6f2ed;
+      --border:     #ddd5ca;
+      --text:       #2e2e2e;
+      --text-muted: #777777;
+      --surface:    #ffffff;
     }
 
     html, body { min-height:100%; background:var(--bg); color:var(--text);
       font-family:'Jost',sans-serif; font-weight:300; }
-
     .page { min-height:100vh; display:flex; flex-direction:column;
       align-items:center; padding:40px 16px 80px; }
-
     .card { width:100%; max-width:700px; background:var(--surface);
       border-radius:3px; box-shadow:0 2px 48px rgba(0,0,0,0.08); overflow:hidden; }
 
@@ -79,7 +76,7 @@
 
     /* Consent scroll box */
     .consent-scroll { background:var(--bg); border-left:3px solid var(--primary);
-      border-radius:0 2px 2px 0; padding:22px 24px; max-height:300px; overflow-y:auto;
+      border-radius:0 2px 2px 0; padding:22px 24px; max-height:340px; overflow-y:auto;
       margin-bottom:20px; font-size:13px; line-height:1.8; color:#555; }
     .consent-scroll::-webkit-scrollbar { width:5px; }
     .consent-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
@@ -87,9 +84,19 @@
       letter-spacing:0.1em; text-transform:uppercase; color:var(--primary-dk);
       margin:18px 0 6px; }
     .consent-scroll h3:first-child { margin-top:0; }
-    .consent-scroll p { margin-bottom:5px; }
+    .consent-scroll p { margin-bottom:6px; }
     .scroll-hint { font-size:11px; color:var(--text-muted); text-align:right;
       margin-bottom:14px; letter-spacing:0.04em; }
+
+    /* Service-specific addendum box */
+    .addendum-box { background:#fff; border:1px solid var(--border); border-radius:2px;
+      padding:20px 22px; margin-top:16px; margin-bottom:4px;
+      font-size:13px; line-height:1.8; color:#555; display:none; }
+    .addendum-box.visible { display:block; }
+    .addendum-box h4 { font-family:'Jost',sans-serif; font-size:10px; font-weight:500;
+      letter-spacing:0.16em; text-transform:uppercase; color:var(--primary);
+      margin-bottom:10px; }
+    .addendum-box p { margin-bottom:5px; }
 
     /* Checkbox */
     .check-row { display:flex; align-items:flex-start; gap:12px; margin-bottom:8px; }
@@ -158,7 +165,7 @@
   <!-- Header -->
   <div class="card-header">
     <div class="center-name">Brisa Medical Spa &amp; Wellness Center</div>
-    <h1 id="hdr-title">General Consent and Acknowledgment</h1>
+    <h1 id="hdr-title">General Consent &amp;<br/>Acknowledgment</h1>
     <p id="hdr-sub">Please complete this form before your appointment. All information is kept confidential and stored securely in your client profile.</p>
   </div>
 
@@ -200,15 +207,15 @@
 
     <div class="field-group" id="field-service">
       <label id="lbl-service">Service Category</label>
-      <select id="service">
+      <select id="service" onchange="onServiceChange()">
         <option value="" id="svc-ph">— Select a category —</option>
-        <option value="General">General</option>
-        <option value="Masaje y Trabajo Corporal">Masaje y Trabajo Corporal</option>
-        <option value="Tratamientos Faciales y de la Piel">Tratamientos Faciales y de la Piel</option>
-        <option value="Tratamientos Láser">Tratamientos Láser</option>
-        <option value="Tratamientos con Cera">Tratamientos con Cera</option>
-        <option value="Tratamientos con Botox">Tratamientos con Botox</option>
-        <option value="Sueroterapia">Sueroterapia</option>
+        <option value="general"   id="svc-general">General</option>
+        <option value="massage"   id="svc-massage">Massage &amp; Corporal Treatments</option>
+        <option value="facial"    id="svc-facial">Facial &amp; Skincare Treatments</option>
+        <option value="laser"     id="svc-laser">Laser &amp; Light Based Treatments</option>
+        <option value="wax"       id="svc-wax">Wax Treatments</option>
+        <option value="botox"     id="svc-botox">Botox Treatments</option>
+        <option value="iv"        id="svc-iv">IV Therapy Treatments</option>
       </select>
       <div class="error-msg" id="err-service">Required</div>
     </div>
@@ -219,9 +226,15 @@
     <div class="scroll-hint" id="lbl-scroll-hint">↕ Scroll to read the full agreement</div>
     <div class="consent-scroll" id="consentBox"></div>
 
-    <div class="check-row">
+    <!-- Service-specific addendum (shown after a category is chosen) -->
+    <div class="addendum-box" id="addendumBox">
+      <h4 id="addendum-title">Additional Consent for Selected Service</h4>
+      <div id="addendumContent"></div>
+    </div>
+
+    <div class="check-row" style="margin-top:18px;">
       <input type="checkbox" id="agreeCheck"/>
-      <span id="lbl-agree">I have read and agree to the General Consent and Acknowledgment above.</span>
+      <span id="lbl-agree">I have read and agree to the General Consent and Acknowledgment, and to any service-specific consent above.</span>
     </div>
 
     <hr class="divider"/>
@@ -259,7 +272,7 @@
       Complete &amp; Download Signed Form
     </button>
 
-  </div>
+  </div><!-- /card-body -->
 
   <!-- Success -->
   <div id="successScreen">
@@ -271,20 +284,145 @@
     <button class="btn-download" onclick="downloadPDF()" id="suc-btn">Download PDF Copy</button>
   </div>
 
-</div>
-</div>
+</div><!-- /card -->
+</div><!-- /page -->
 
 <script>
-/* ── Bilingual content ────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   SERVICE CATEGORY ADDENDA  (per-service consent text)
+   ═══════════════════════════════════════════════════════════ */
+const ADDENDA = {
+  en: {
+    general: null,
+    massage: {
+      title: 'Additional Consent — Massage & Corporal Treatments',
+      html: `
+        <p>I understand that massage and corporal treatments may involve techniques such as deep tissue work, assisted stretching, and manual pressure applied to muscles and soft tissue. I understand that the therapist does not diagnose illness or disease, and that massage therapy is not a substitute for medical examination or treatment.</p>
+        <p>I agree to inform the therapist immediately of any pain or discomfort during the session so that pressure or technique may be adjusted accordingly. I have disclosed or will disclose to the therapist any relevant conditions, including but not limited to recent surgery, fractures, injuries, blood clots, fever, active infection, cancer, cardiovascular disease, or pregnancy.</p>
+        <p>I understand that any conduct deemed inappropriate by the therapist or center staff will result in the immediate termination of the session, and that future services may be refused.</p>
+        <p>I voluntarily consent to receive massage and corporal treatments as discussed with my provider.</p>`
+    },
+    facial: {
+      title: 'Additional Consent — Facial & Skincare Treatments',
+      html: `
+        <p>I understand that facial and skin-care treatments may include cleansing, exfoliation, extraction, masks, facial massage, chemical peels, microdermabrasion, radiofrequency, ultrasound, LED therapy, or similar procedures, as discussed with my provider.</p>
+        <p>I understand that possible risks and side effects include temporary redness, irritation, peeling, tightness, breakouts or purging, hyperpigmentation or hypopigmentation, increased sensitivity, allergic reactions, and, in rare cases, scarring or infection. I understand that sun exposure, tanning, and certain medications — including retinoids or photosensitizing drugs — may increase these risks.</p>
+        <p>I agree to follow all pre- and post-treatment instructions provided by my provider, including avoiding direct sun exposure, applying recommended sunscreen, and promptly reporting any unusual skin reactions or changes.</p>
+        <p>I voluntarily consent to facial and skin-care treatments as discussed with my provider.</p>`
+    },
+    laser: {
+      title: 'Additional Consent — Laser & Light Based Treatments',
+      html: `
+        <p>I understand that laser and light-based treatments — including, but not limited to, laser hair removal and skin rejuvenation — use concentrated light energy to target specific structures within the skin.</p>
+        <p>I understand that possible risks and side effects include discomfort or pain during the procedure, temporary redness, swelling, blistering, burns, changes in skin pigmentation (hyperpigmentation or hypopigmentation), scarring, infection, activation of herpes simplex (cold sores), changes in hair growth patterns, and, if appropriate eye protection is not used, risk of eye injury.</p>
+        <p>I understand that active tanning, recent sun exposure, use of self-tanning products, and certain medications — such as isotretinoin or photosensitizing agents — significantly increase the risk of complications. I agree to follow all pre- and post-treatment instructions, including avoiding sun exposure, consistently applying recommended sunscreen, and wearing prescribed eye protection during the procedure.</p>
+        <p>I understand that no specific outcome or number of sessions required can be guaranteed, and that individual results may vary.</p>
+        <p>I voluntarily consent to laser and light-based treatment as discussed with my provider.</p>`
+    },
+    wax: {
+      title: 'Additional Consent — Wax Treatments',
+      html: `
+        <p>I understand that wax hair removal is an aesthetic procedure that involves the application of warm or cold wax to the skin to remove hair from the follicle. The purpose, expected results, and available alternatives — including other hair-removal methods or no treatment — have been explained to me.</p>
+        <p>I understand that possible risks and discomforts include pain or burning sensation during and after application, temporary redness, swelling, skin irritation or sensitivity, folliculitis (inflammation of the hair follicles), minor burns from incorrect wax temperature, temporary hyperpigmentation or hypopigmentation, allergic reactions to wax components or post-treatment products, and, in rare cases, scarring.</p>
+        <p>I understand that certain factors may increase the risk of complications, including: current or recent use of topical or oral retinoids (such as tretinoin or isotretinoin), exfoliating acids (AHAs or BHAs), benzoyl peroxide or similar cell-renewal agents; recent sun exposure or active tanning; skin conditions such as rosacea, eczema, psoriasis, or other inflammatory disorders; use of blood thinners or corticosteroids; and recent aesthetic procedures performed on the area to be treated.</p>
+        <p>I have disclosed my relevant medical history, current medications, and any known skin conditions to the provider. I agree to follow all pre- and post-treatment instructions, including avoiding direct sun exposure, refraining from applying irritating products to the treated area, and using the recommended sunscreen.</p>
+        <p>I understand that I must immediately inform the provider of any intense pain, burning sensation, or unusual skin reaction during or after the session.</p>
+        <p>I voluntarily consent to wax hair removal as discussed with my provider.</p>`
+    },
+    botox: {
+      title: 'Additional Consent — Botulinum Toxin (Botox) Treatments',
+      html: `
+        <p>I request and consent to the injection of botulinum toxin (such as Botox or equivalent products) for the treatment of facial lines and/or such other indications as discussed with my provider. I understand that this is an elective cosmetic procedure. The mechanism of action, expected onset and duration of effect — typically approximately three to four (3–4) months — and available alternatives, including no treatment, have been explained to me.</p>
+        <p>I understand that possible side effects and risks include pain, redness or bruising at the injection site, localized swelling, headache, flu-like symptoms, nausea, temporary drooping of the eyelid or eyebrow (ptosis), facial asymmetry, unintended effect on adjacent muscles, double or blurred vision, dry eyes or excessive tearing, difficulty swallowing or speaking, allergic or hypersensitivity reactions, and, in very rare cases, serious systemic effects. I understand that the degree of improvement, the duration of effect, and individual response cannot be guaranteed.</p>
+        <p>I confirm that I am not pregnant or breastfeeding. I have fully disclosed to my provider any neuromuscular disorders, current medications — including anticoagulants and muscle relaxants — known allergies, and prior cosmetic or medical procedures.</p>
+        <p>I agree to follow all post-treatment instructions provided by my provider, including remaining in an upright position for the recommended period and refraining from touching, rubbing, or massaging the treated areas unless otherwise directed.</p>
+        <p>I have had the opportunity to ask questions, and all questions have been answered to my satisfaction. I voluntarily consent to botulinum toxin injections as discussed with my provider.</p>`
+    },
+    iv: {
+      title: 'Additional Consent — IV Therapy',
+      html: `
+        <p>I request and consent to receive intravenous (IV) infusion therapy, including fluids, vitamins, minerals, medications, and/or other substances as discussed with my provider. The purpose, expected benefits, and available alternatives — including oral supplementation or no treatment — have been explained to me.</p>
+        <p>I understand that possible risks and complications include discomfort, pain, bruising or bleeding at the insertion site; infiltration or extravasation (leakage of fluid into surrounding tissue); phlebitis (inflammation of the vein); infection at the insertion site; allergic or anaphylactic reactions; lightheadedness or fainting; changes in blood pressure or heart rate; fluid overload; and disturbances in electrolyte or mineral balance.</p>
+        <p>I understand that certain pre-existing medical conditions — including kidney, cardiac or liver disease, uncontrolled hypertension, and pregnancy — may increase the risk of complications. I have fully and accurately disclosed my medical history and current medications to my provider.</p>
+        <p>I agree to immediately inform the provider of any unusual sensation, pain, or symptom that arises during or after the infusion.</p>
+        <p>I voluntarily consent to IV infusion therapy as discussed with my provider.</p>`
+    }
+  },
+  es: {
+    general: null,
+    massage: {
+      title: 'Consentimiento Adicional — Masaje y Tratamientos Corporales',
+      html: `
+        <p>Entiendo que los masajes y tratamientos corporales pueden incluir técnicas como trabajo en tejido profundo, estiramiento asistido y presión manual aplicada sobre músculos y tejidos blandos. Entiendo que el/la terapeuta no diagnostica enfermedades o afecciones médicas, y que el masaje terapéutico no sustituye el examen o tratamiento médico.</p>
+        <p>Me comprometo a informar de inmediato al/a la terapeuta sobre cualquier dolor o molestia durante la sesión, de modo que la presión o la técnica puedan ajustarse. He informado o informaré al/a la terapeuta sobre cualquier condición relevante, incluyendo, entre otras: cirugías recientes, fracturas, lesiones, coágulos sanguíneos, fiebre, infecciones activas, cáncer, enfermedades cardiovasculares o embarazo.</p>
+        <p>Entiendo que cualquier conducta considerada inapropiada por el/la terapeuta o el personal del centro resultará en la finalización inmediata de la sesión, y que podrían negárseme servicios futuros.</p>
+        <p>Otorgo voluntariamente mi consentimiento para recibir masajes y tratamientos corporales tal como fueron discutidos con mi prestador/a de servicios.</p>`
+    },
+    facial: {
+      title: 'Consentimiento Adicional — Tratamientos Faciales y de la Piel',
+      html: `
+        <p>Entiendo que los tratamientos faciales y de la piel pueden incluir limpieza, exfoliación, extracción, mascarillas, masaje facial, peelings químicos, microdermoabrasión, radiofrecuencia, ultrasonido, terapia LED u otros procedimientos similares, según lo acordado con mi prestador/a de servicios.</p>
+        <p>Entiendo que los posibles riesgos y efectos secundarios incluyen enrojecimiento temporal, irritación, descamación, sensación de tensión, aparición de imperfecciones o purging, hiperpigmentación o hipopigmentación, aumento de la sensibilidad, reacciones alérgicas y, en casos poco frecuentes, cicatrización o infección. Entiendo que la exposición solar, el bronceado y ciertos medicamentos — como los retinoides o los fármacos fotosensibilizantes — pueden incrementar estos riesgos.</p>
+        <p>Me comprometo a seguir todas las instrucciones de cuidado previas y posteriores al tratamiento proporcionadas por mi prestador/a, incluyendo evitar la exposición directa al sol, aplicar el protector solar recomendado e informar de inmediato sobre cualquier reacción o cambio inusual en la piel.</p>
+        <p>Otorgo voluntariamente mi consentimiento para recibir tratamientos faciales y de la piel tal como fueron discutidos con mi prestador/a de servicios.</p>`
+    },
+    laser: {
+      title: 'Consentimiento Adicional — Tratamientos Láser y con Luz',
+      html: `
+        <p>Entiendo que los tratamientos láser y con luz — incluyendo, entre otros, la depilación láser y el rejuvenecimiento cutáneo — utilizan energía lumínica concentrada para actuar sobre estructuras específicas de la piel.</p>
+        <p>Entiendo que los posibles riesgos y efectos secundarios incluyen molestias o dolor durante el procedimiento, enrojecimiento temporal, inflamación, ampollas, quemaduras, cambios en la pigmentación de la piel (hiperpigmentación o hipopigmentación), cicatrización, infección, activación del herpes simple (herpes labial), alteraciones en el patrón de crecimiento del vello y, en caso de no utilizar la protección ocular adecuada, riesgo de lesión ocular.</p>
+        <p>Entiendo que el bronceado activo, la exposición solar reciente, el uso de autobronceadores y ciertos medicamentos — como la isotretinoína o los agentes fotosensibilizantes — aumentan considerablemente el riesgo de complicaciones. Me comprometo a seguir todas las instrucciones de cuidado previas y posteriores al tratamiento, incluyendo evitar la exposición solar, aplicar el protector solar recomendado y utilizar la protección ocular indicada durante el procedimiento.</p>
+        <p>Entiendo que no se puede garantizar ningún resultado específico ni el número de sesiones necesarias, y que los resultados individuales pueden variar.</p>
+        <p>Otorgo voluntariamente mi consentimiento para recibir tratamientos láser y con luz tal como fueron discutidos con mi prestador/a de servicios.</p>`
+    },
+    wax: {
+      title: 'Consentimiento Adicional — Tratamientos con Cera',
+      html: `
+        <p>Entiendo que la depilación con cera es un procedimiento estético que consiste en aplicar cera caliente o fría sobre la piel para remover el vello desde el folículo. El propósito, los resultados esperados y las alternativas disponibles — incluyendo otros métodos de depilación o la abstención del tratamiento — me han sido explicados.</p>
+        <p>Entiendo que los posibles riesgos e incomodidades incluyen: dolor o sensación de ardor durante y después de la aplicación, enrojecimiento temporal, inflamación, irritación o sensibilidad cutánea, foliculitis (inflamación de los folículos pilosos), quemaduras leves por temperatura incorrecta de la cera, hiperpigmentación o hipopigmentación transitoria, reacciones alérgicas a los componentes de la cera o a los productos aplicados, y, en casos poco frecuentes, cicatrización.</p>
+        <p>Entiendo que ciertos factores pueden aumentar el riesgo de complicaciones, incluyendo: uso actual o reciente de retinoides tópicos u orales (como tretinoína o isotretinoína), ácidos exfoliantes (AHA o BHA), peróxido de benzoílo u otros agentes de renovación celular; exposición solar reciente o bronceado activo; afecciones cutáneas como rosácea, eccema, psoriasis u otras alteraciones inflamatorias; uso de anticoagulantes o corticosteroides; y la realización reciente de procedimientos estéticos en la zona a tratar.</p>
+        <p>He informado al/a la prestador/a sobre mi historial médico relevante, medicamentos actuales y condiciones cutáneas conocidas. Me comprometo a seguir todas las instrucciones de cuidado previas y posteriores al tratamiento, incluyendo evitar la exposición directa al sol, abstenerme de aplicar productos irritantes en la zona tratada y utilizar el protector solar recomendado.</p>
+        <p>Entiendo que debo informar de inmediato al/a la prestador/a sobre cualquier dolor intenso, ardor o reacción cutánea inusual que ocurra durante o después de la sesión.</p>
+        <p>Otorgo voluntariamente mi consentimiento para recibir depilación con cera tal como fue discutida con mi prestador/a de servicios.</p>`
+    },
+    botox: {
+      title: 'Consentimiento Adicional — Toxina Botulínica (Botox)',
+      html: `
+        <p>Solicito y consiento la aplicación de toxina botulínica (como Botox o productos equivalentes) para el tratamiento de líneas de expresión faciales y/u otras indicaciones según lo acordado con mi prestador/a de servicios. Entiendo que se trata de un procedimiento cosmético electivo. El mecanismo de acción, el inicio y la duración esperada del efecto — generalmente entre tres y cuatro (3 a 4) meses aproximadamente — y las alternativas disponibles, incluida la opción de no tratarse, me han sido explicados.</p>
+        <p>Entiendo que los posibles efectos secundarios y riesgos incluyen: dolor, enrojecimiento o moretones en el sitio de inyección, inflamación localizada, cefalea, síntomas similares a los de la gripe, náuseas, caída temporal del párpado o de la ceja (ptosis), asimetría facial, efecto no deseado sobre músculos adyacentes, visión doble o borrosa, sequedad ocular o lagrimeo excesivo, dificultad para tragar o hablar, reacciones alérgicas o de hipersensibilidad y, en casos muy poco frecuentes, efectos sistémicos graves. Entiendo que el grado de mejoría, la duración del efecto y la respuesta individual no pueden garantizarse.</p>
+        <p>Confirmo que no estoy embarazada ni en período de lactancia. He informado plenamente a mi prestador/a sobre cualquier trastorno neuromuscular, medicamentos actuales — incluyendo anticoagulantes y relajantes musculares — alergias conocidas y procedimientos cosméticos o médicos previos.</p>
+        <p>Me comprometo a seguir todas las instrucciones de cuidado posteriores al tratamiento proporcionadas por mi prestador/a, incluyendo mantenerme en posición vertical durante el período recomendado y abstenerme de tocar, frotar o masajear las zonas tratadas, salvo indicación expresa en contrario.</p>
+        <p>He tenido la oportunidad de formular preguntas y todas han sido respondidas a mi entera satisfacción. Otorgo voluntariamente mi consentimiento para recibir inyecciones de toxina botulínica tal como fueron discutidas con mi prestador/a de servicios.</p>`
+    },
+    iv: {
+      title: 'Consentimiento Adicional — Sueroterapia (Terapia Intravenosa)',
+      html: `
+        <p>Solicito y consiento recibir terapia de infusión intravenosa (IV), que puede incluir líquidos, vitaminas, minerales, medicamentos y/u otras sustancias, según lo acordado con mi prestador/a de servicios. El propósito, los beneficios esperados y las alternativas disponibles — incluyendo la suplementación oral o la abstención del tratamiento — me han sido explicados.</p>
+        <p>Entiendo que los posibles riesgos y complicaciones incluyen: molestia, dolor, moretones o sangrado en el sitio de inserción; infiltración o extravasación (fuga de líquido al tejido circundante); flebitis (inflamación de la vena); infección en el sitio de inserción; reacciones alérgicas o anafilácticas; mareos o desmayos; cambios en la presión arterial o la frecuencia cardíaca; sobrecarga de líquidos; y alteraciones en el equilibrio de electrolitos o minerales.</p>
+        <p>Entiendo que ciertas condiciones médicas preexistentes — como enfermedades renales, cardíacas o hepáticas, hipertensión no controlada y embarazo — pueden aumentar el riesgo de complicaciones. He informado de manera completa y precisa a mi prestador/a sobre mi historial médico y medicamentos actuales.</p>
+        <p>Me comprometo a informar de inmediato al/a la prestador/a sobre cualquier sensación inusual, dolor o síntoma que se presente durante o después de la infusión.</p>
+        <p>Otorgo voluntariamente mi consentimiento para recibir terapia de infusión intravenosa tal como fue discutida con mi prestador/a de servicios.</p>`
+    }
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════
+   BILINGUAL UI STRINGS & GENERAL CONSENT TEXT
+   ═══════════════════════════════════════════════════════════ */
 const T = {
   en: {
     hdrTitle:'General Consent &amp;<br/>Acknowledgment',
     hdrSub:'Please complete this form before your appointment. All information is kept confidential and stored securely in your client profile.',
     lblPersonal:'Personal Information', lblFname:'First Name', lblLname:'Last Name',
     lblEmail:'Email', lblPhone:'Phone', lblService:'Service Category',
-    svcPH:'— Select a category —', lblConsentHdr:'Consent &amp; Agreement',
+    svcPH:'— Select a category —',
+    svcLabels:{ general:'General', massage:'Massage & Corporal Treatments',
+      facial:'Facial & Skincare Treatments', laser:'Laser & Light Based Treatments',
+      wax:'Wax Treatments', botox:'Botox Treatments', iv:'IV Therapy Treatments' },
+    lblConsentHdr:'Consent &amp; Agreement',
     lblScrollHint:'↕ Scroll to read the full agreement',
-    lblAgree:'I have read and agree to the General Consent and Acknowledgment above.',
+    lblAgree:'I have read and agree to the General Consent and Acknowledgment, and to any service-specific consent above.',
+    addendumTitle:'Additional Consent for Selected Service',
     lblSigHdr:'Signature', lblSigInst:'Please sign below using your finger, stylus, or mouse.',
     lblSignHere:'Sign here', lblClear:'Clear signature', sigErrMsg:'Signature is required.',
     errRequired:'Required', errEmail:'Valid email required',
@@ -295,37 +433,39 @@ const T = {
     sucBtn:'Download PDF Copy',
     consent:`
       <h3>1. Purpose of Visit</h3>
-      <p>I understand that the services provided at this wellness center may include massage therapy, skin-care treatments, laser and other aesthetic procedures, injectable treatments (such as botulinum toxin) and IV therapy, among others.</p>
-      <p>I understand that many of these services are elective and are intended to promote relaxation, appearance, and general wellness, and are not a substitute for ongoing medical care with my physician.</p>
+      <p>I understand that the services provided at this wellness center may include massage therapy, skin-care treatments, laser and other aesthetic procedures, injectable treatments (such as botulinum toxin), and IV therapy, among others. I understand that many of these services are elective and are intended to promote relaxation, appearance, and general wellness, and are not a substitute for ongoing medical care with my physician.</p>
       <h3>2. Medical Information and Responsibility</h3>
-      <p>I certify that the medical and personal information I have provided is complete and accurate, including medications, allergies, medical conditions, and pregnancy or breastfeeding status.</p>
-      <p>I agree to inform the staff of any changes to my health, medications, or pregnancy status before each treatment.</p>
+      <p>I certify that the medical and personal information I have provided is complete and accurate, including medications, allergies, medical conditions, and pregnancy or breastfeeding status. I agree to inform the staff of any changes to my health, medications, or pregnancy status before each treatment.</p>
       <h3>3. General Risks and No Guarantees</h3>
-      <p>I understand that all treatments may have risks, including but not limited to discomfort, bruising, temporary redness or swelling, allergic or sensitivity reactions, infection, and unsatisfactory results.</p>
-      <p>I understand that no specific result can be guaranteed and that results may vary from person to person.</p>
+      <p>I understand that all treatments may carry risks, including but not limited to discomfort, bruising, temporary redness or swelling, allergic or sensitivity reactions, infection, and unsatisfactory results. I understand that no specific outcome can be guaranteed and that results may vary from person to person.</p>
       <h3>4. Right to Ask Questions and to Refuse</h3>
-      <p>I understand that I have the right to ask questions about my treatment at any time, and to receive answers in language I can understand.</p>
-      <p>I understand that I may refuse or discontinue any treatment at any time, even after signing this form, and that such refusal will not affect my right to future care at this center, except where a particular treatment is necessary to proceed.</p>
+      <p>I understand that I have the right to ask questions about my treatment at any time and to receive answers in language I can understand. I understand that I may refuse or discontinue any treatment at any time, even after signing this form, and that such refusal will not affect my right to future care at this center, except where a particular treatment is necessary to proceed.</p>
       <h3>5. Photography and Records (Clinical Only)</h3>
-      <p>I understand that the center may take clinical photographs to document my condition before, during, and after treatment. These images will be stored in my confidential record and used only for clinical and quality-assurance purposes, unless I sign a separate authorization for marketing or educational use.</p>
+      <p>I understand that the center may take clinical photographs to document my condition before, during, and after treatment. These images will be stored in my confidential record and used solely for clinical and quality-assurance purposes, unless I sign a separate authorization for marketing or educational use.</p>
       <h3>6. Privacy and Communication</h3>
-      <p>I authorize the wellness center to use and disclose my health and contact information for purposes of treatment, billing, and healthcare operations, consistent with applicable privacy laws. I understand that I may request limits on certain uses and disclosures.</p>
-      <p>I consent to be contacted by phone, text message, email or messaging apps I provide for appointment reminders, follow-ups and limited educational information. I understand that electronic communications may carry some risk of unauthorized access.</p>
+      <p>I authorize the wellness center to use and disclose my health and contact information for purposes of treatment, billing, and healthcare operations, consistent with applicable privacy laws. I understand that I may request limits on certain uses and disclosures. I consent to be contacted by phone, text message, email, or messaging applications I provide, for appointment reminders, follow-ups, and limited educational information. I understand that electronic communications may carry some risk of unauthorized access.</p>
       <h3>7. Financial Responsibility and Cancellation Policy</h3>
-      <p>I understand that I am financially responsible for all charges not covered by any insurance or third-party payer, if applicable.</p>
-      <p>I understand the center's cancellation and no-show policy and agree to follow it, including any fees that may apply. Cancellations should preferably be made 24 hours prior to the scheduled appointment. If a cancellation is made within 24 hours of the appointment, or in case of a no-show, I may be required to pay a 50% deposit prior to making another appointment. I understand that this deposit will be non-refundable.</p>
+      <p>I understand that I am financially responsible for all charges not covered by any insurance or third-party payer, if applicable. I understand the center's cancellation and no-show policy and agree to comply with it, including any applicable fees. Cancellations should preferably be made at least 24 hours prior to the scheduled appointment. Cancellations made within 24 hours of the appointment, or failure to appear without prior notice, may result in a requirement to pay a non-refundable 50% deposit before scheduling a future appointment.</p>
       <h3>8. Consent to Treatment</h3>
-      <p>I acknowledge that I have read and understood this General Consent and Acknowledgment. I have had the opportunity to ask questions, and all my questions have been answered to my satisfaction.</p>
-      <p>I hereby voluntarily consent to receive services at this wellness center, as recommended by the provider, and I understand that I will receive specific information and sign additional consent(s) for certain procedures (such as laser, injectables, or IV therapy).</p>`
+      <p>I acknowledge that I have read and understood this General Consent and Acknowledgment. I have had the opportunity to ask questions, and all questions have been answered to my satisfaction. I hereby voluntarily consent to receive services at this wellness center as recommended by my provider, and I understand that I will receive specific information and sign additional consent(s) for certain procedures, such as laser, injectables, or IV therapy.</p>
+      <h3>9. Staffing and Provider Assignment</h3>
+      <p>I understand and agree that all treatment packages and services are purchased from Brisa Medical Spa &amp; Wellness Center ("Brisa"), and that the contractual relationship exists solely between Brisa and me, and not between me and any individual employee, therapist, technician, or provider.</p>
+      <p>While Brisa will make reasonable efforts to accommodate my preference for a particular provider when requested, Brisa does not guarantee the availability of any specific provider for any scheduled service, package session, or future appointment. I acknowledge and agree that Brisa may assign, reassign, or substitute any qualified member of its staff to perform the purchased services whenever reasonably necessary for scheduling, operational, staffing, leave of absence, separation of employment, or any other legitimate business reason, provided that the substitute is duly authorized and qualified to perform the service.</p>
+      <p>A request for a particular provider constitutes a preference only. It does not create a personal right to be treated by that individual, nor does it constitute a material term of the purchased service or package.</p>`
   },
   es: {
     hdrTitle:'Consentimiento General<br/>y Reconocimiento',
     hdrSub:'Por favor complete este formulario antes de su cita. Toda la información se mantiene confidencial y se almacena de forma segura en su perfil de cliente.',
     lblPersonal:'Información Personal', lblFname:'Nombre', lblLname:'Apellido',
     lblEmail:'Correo electrónico', lblPhone:'Teléfono', lblService:'Categoría de Servicio',
-    svcPH:'— Seleccione una categoría —', lblConsentHdr:'Consentimiento y Acuerdo',
+    svcPH:'— Seleccione una categoría —',
+    svcLabels:{ general:'General', massage:'Masaje y Trabajo Corporal',
+      facial:'Tratamientos Faciales y de la Piel', laser:'Tratamientos Láser',
+      wax:'Tratamientos con Cera', botox:'Tratamientos con Botox', iv:'Sueroterapia' },
+    lblConsentHdr:'Consentimiento y Acuerdo',
     lblScrollHint:'↕ Desplácese para leer el acuerdo completo',
-    lblAgree:'He leído y acepto el Consentimiento General y Reconocimiento anterior.',
+    lblAgree:'He leído y acepto el Consentimiento General y Reconocimiento, así como cualquier consentimiento específico por servicio indicado anteriormente.',
+    addendumTitle:'Consentimiento Adicional para el Servicio Seleccionado',
     lblSigHdr:'Firma', lblSigInst:'Por favor firme abajo con su dedo, lápiz óptico o ratón.',
     lblSignHere:'Firme aquí', lblClear:'Borrar firma', sigErrMsg:'La firma es requerida.',
     errRequired:'Requerido', errEmail:'Correo electrónico válido requerido',
@@ -336,85 +476,122 @@ const T = {
     sucBtn:'Descargar Copia en PDF',
     consent:`
       <h3>1. Propósito de la Visita</h3>
-      <p>Entiendo que los servicios proporcionados en este centro de bienestar pueden incluir masajes, tratamientos faciales y de la piel, tratamientos láser u otros procedimientos estéticos, tratamientos inyectables (como toxina botulínica) y sueroterapia / terapia intravenosa, entre otros.</p>
-      <p>Entiendo que muchos de estos servicios son electivos y tienen como objetivo promover la relajación, la apariencia y el bienestar general, y no sustituyen la atención médica continua con mi médico.</p>
+      <p>Entiendo que los servicios proporcionados en este centro de bienestar pueden incluir masajes, tratamientos faciales y de la piel, tratamientos láser u otros procedimientos estéticos, tratamientos inyectables (como toxina botulínica) y sueroterapia / terapia intravenosa, entre otros. Entiendo que muchos de estos servicios son electivos y tienen como objetivo promover la relajación, la apariencia y el bienestar general, y no sustituyen la atención médica continua con mi médico.</p>
       <h3>2. Información Médica y Responsabilidad</h3>
-      <p>Certifico que la información médica y personal que he proporcionado es completa y veraz, incluyendo mis medicamentos, alergias, enfermedades y si estoy embarazada o en período de lactancia.</p>
-      <p>Acepto informar al personal sobre cualquier cambio en mi salud, medicamentos o estado de embarazo antes de cada tratamiento.</p>
+      <p>Certifico que la información médica y personal que he proporcionado es completa y veraz, incluyendo mis medicamentos, alergias, enfermedades y si estoy embarazada o en período de lactancia. Acepto informar al personal sobre cualquier cambio en mi salud, medicamentos o estado de embarazo antes de cada tratamiento.</p>
       <h3>3. Riesgos Generales y Ausencia de Garantías</h3>
-      <p>Entiendo que todos los tratamientos pueden implicar riesgos, incluyendo, entre otros, molestias, moretes, enrojecimiento o hinchazón temporal, reacciones alérgicas o de sensibilidad, infección y resultados insatisfactorios.</p>
-      <p>Entiendo que no se puede garantizar un resultado específico y que los resultados pueden variar de una persona a otra.</p>
+      <p>Entiendo que todos los tratamientos pueden implicar riesgos, incluyendo, entre otros: molestias, moretes, enrojecimiento o hinchazón temporal, reacciones alérgicas o de sensibilidad, infección y resultados insatisfactorios. Entiendo que no se puede garantizar un resultado específico y que los resultados pueden variar de una persona a otra.</p>
       <h3>4. Derecho a Hacer Preguntas y a Negarse</h3>
-      <p>Entiendo que tengo derecho a hacer preguntas sobre mi tratamiento en cualquier momento y a recibir respuestas en un lenguaje que pueda comprender.</p>
-      <p>Entiendo que puedo negarme o suspender cualquier tratamiento en cualquier momento, incluso después de firmar este formulario, y que dicha negativa no afectará mi derecho a recibir atención futura en este centro, excepto cuando un tratamiento específico sea necesario para proceder.</p>
+      <p>Entiendo que tengo derecho a hacer preguntas sobre mi tratamiento en cualquier momento y a recibir respuestas en un lenguaje que pueda comprender. Entiendo que puedo negarme o suspender cualquier tratamiento en cualquier momento, incluso después de firmar este formulario, y que dicha negativa no afectará mi derecho a recibir atención futura en este centro, excepto cuando un tratamiento específico sea necesario para proceder.</p>
       <h3>5. Fotografías e Historias Clínicas (Solo Uso Clínico)</h3>
-      <p>Entiendo que el centro puede tomar fotografías clínicas para documentar mi condición antes, durante y después del tratamiento. Estas imágenes se guardarán de forma confidencial en mi expediente y se utilizarán solo con fines clínicos y de control de calidad, a menos que firme una autorización separada para uso con fines de mercadeo o educativos.</p>
+      <p>Entiendo que el centro puede tomar fotografías clínicas para documentar mi condición antes, durante y después del tratamiento. Estas imágenes se guardarán de forma confidencial en mi expediente y se utilizarán únicamente con fines clínicos y de control de calidad, a menos que firme una autorización separada para uso con fines de mercadeo o educativos.</p>
       <h3>6. Privacidad y Comunicación</h3>
-      <p>Autorizo al centro de bienestar a utilizar y divulgar mi información de salud y contacto para fines de tratamiento, facturación y operaciones de atención médica, de acuerdo con las leyes de privacidad aplicables. Entiendo que puedo solicitar límites a ciertos usos y divulgaciones.</p>
-      <p>Autorizo que se comuniquen conmigo por teléfono, mensajes de texto, correo electrónico o aplicaciones de mensajería que proporcione, para recordatorios de citas, seguimientos e información educativa limitada. Entiendo que las comunicaciones electrónicas pueden implicar cierto riesgo de acceso no autorizado.</p>
+      <p>Autorizo al centro de bienestar a utilizar y divulgar mi información de salud y contacto para fines de tratamiento, facturación y operaciones de atención médica, de acuerdo con las leyes de privacidad aplicables. Entiendo que puedo solicitar límites a ciertos usos y divulgaciones. Autorizo que se comuniquen conmigo por teléfono, mensajes de texto, correo electrónico o aplicaciones de mensajería, para recordatorios de citas, seguimientos e información educativa limitada. Entiendo que las comunicaciones electrónicas pueden implicar cierto riesgo de acceso no autorizado.</p>
       <h3>7. Responsabilidad Económica y Política de Cancelación</h3>
-      <p>Entiendo que soy responsable económicamente de todos los cargos que no estén cubiertos por seguros u otros terceros pagadores, si aplica.</p>
-      <p>Entiendo la política de cancelación y de citas no asistidas del centro y acepto cumplirla, incluyendo cualquier cargo que pueda aplicar. Las cancelaciones deben hacerse preferiblemente con 24 horas de anticipación a la cita programada. Si se realiza una cancelación dentro de las 24 horas previas a la cita, o en caso de no presentarse, se me puede requerir el pago de un depósito del 50% antes de programar otra cita. Entiendo que este depósito no será reembolsable.</p>
+      <p>Entiendo que soy responsable económicamente de todos los cargos que no estén cubiertos por seguros u otros terceros pagadores, si aplica. Entiendo la política de cancelación y de citas no asistidas del centro y acepto cumplirla, incluyendo cualquier cargo que pueda aplicar. Las cancelaciones deben realizarse preferiblemente con al menos 24 horas de anticipación a la cita programada. Las cancelaciones dentro de las 24 horas previas a la cita, o la inasistencia sin previo aviso, pueden generar la obligación de pagar un depósito no reembolsable del 50% antes de programar una nueva cita.</p>
       <h3>8. Consentimiento para Tratamiento</h3>
-      <p>Reconozco que he leído y comprendido este Consentimiento General y Reconocimiento. He tenido la oportunidad de hacer preguntas y todas mis preguntas han sido respondidas a mi entera satisfacción.</p>
-      <p>Por este medio otorgo voluntariamente mi consentimiento para recibir servicios en este centro de bienestar, según lo recomiende el profesional, y entiendo que recibiré información específica y firmaré consentimientos adicionales para ciertos procedimientos (como láser, inyectables o sueroterapia).</p>`
+      <p>Reconozco que he leído y comprendido este Consentimiento General y Reconocimiento. He tenido la oportunidad de hacer preguntas y todas han sido respondidas a mi entera satisfacción. Por este medio otorgo voluntariamente mi consentimiento para recibir servicios en este centro de bienestar, según lo recomiende el profesional, y entiendo que recibiré información específica y firmaré consentimientos adicionales para ciertos procedimientos, como láser, inyectables o sueroterapia.</p>
+      <h3>9. Asignación de Personal y Prestación del Servicio</h3>
+      <p>Entiendo y acepto que todos los paquetes de tratamientos y servicios son adquiridos de Brisa Medical Spa &amp; Wellness Center ("Brisa"), y que la relación contractual existe únicamente entre Brisa y el cliente, y no entre el cliente y ningún empleado, terapeuta, técnico o prestador individual del servicio.</p>
+      <p>Si bien Brisa realizará esfuerzos razonables para atender la preferencia del cliente por un prestador/a en particular cuando así se solicite, Brisa no garantiza la disponibilidad de ningún prestador/a específico para un servicio programado, una sesión de paquete o una cita futura. El cliente reconoce y acepta que Brisa podrá asignar, reasignar o sustituir a cualquier miembro calificado de su personal para prestar los servicios adquiridos cuando ello sea razonablemente necesario por motivos de agenda, operación, disponibilidad de personal, licencias, terminación de la relación laboral o cualquier otra razón comercial legítima, siempre que la persona sustituta esté debidamente autorizada y calificada para prestar el servicio.</p>
+      <p>La solicitud de un prestador/a en particular constituye únicamente una preferencia del cliente. No genera un derecho personal a ser atendido por dicho individuo, ni constituye una condición esencial del servicio o paquete adquirido.</p>`
   }
 };
 
+/* ═══════════════════════════════════════════════════════════
+   LANG & SERVICE STATE
+   ═══════════════════════════════════════════════════════════ */
 let lang = 'en';
+let currentService = '';
 
 function setLang(l) {
   lang = l;
   const t = T[l];
   document.getElementById('btn-en').classList.toggle('active', l==='en');
   document.getElementById('btn-es').classList.toggle('active', l==='es');
-  document.getElementById('hdr-title').innerHTML        = t.hdrTitle;
-  document.getElementById('hdr-sub').textContent        = t.hdrSub;
-  document.getElementById('lbl-personal').textContent   = t.lblPersonal;
-  document.getElementById('lbl-fname').textContent      = t.lblFname;
-  document.getElementById('lbl-lname').textContent      = t.lblLname;
-  document.getElementById('lbl-email').textContent      = t.lblEmail;
-  document.getElementById('lbl-phone').textContent      = t.lblPhone;
-  document.getElementById('lbl-service').textContent    = t.lblService;
-  document.getElementById('svc-ph').textContent         = t.svcPH;
-  document.getElementById('lbl-consent-hdr').innerHTML  = t.lblConsentHdr;
-  document.getElementById('lbl-scroll-hint').textContent= t.lblScrollHint;
-  document.getElementById('lbl-agree').textContent      = t.lblAgree;
-  document.getElementById('lbl-sig-hdr').textContent    = t.lblSigHdr;
-  document.getElementById('lbl-sig-inst').textContent   = t.lblSigInst;
-  document.getElementById('lbl-sign-here').textContent  = t.lblSignHere;
-  document.getElementById('lbl-clear').textContent      = t.lblClear;
-  document.getElementById('sigError').textContent       = t.sigErrMsg;
-  document.getElementById('err-fname').textContent      = t.errRequired;
-  document.getElementById('err-lname').textContent      = t.errRequired;
-  document.getElementById('err-email').textContent      = t.errEmail;
-  document.getElementById('err-service').textContent    = t.errRequired;
-  document.getElementById('err-date').textContent       = t.errRequired;
-  document.getElementById('lbl-date').textContent       = t.lblDate;
-  document.getElementById('lbl-loc').textContent        = t.lblLoc;
-  document.getElementById('btn-submit-lbl').innerHTML   = t.btnSubmit;
-  document.getElementById('suc-title').textContent      = t.sucTitle;
-  document.getElementById('suc-body').textContent       = t.sucBody;
-  document.getElementById('suc-btn').textContent        = t.sucBtn;
-  document.getElementById('consentBox').innerHTML       = t.consent;
+  document.getElementById('hdr-title').innerHTML         = t.hdrTitle;
+  document.getElementById('hdr-sub').textContent         = t.hdrSub;
+  document.getElementById('lbl-personal').textContent    = t.lblPersonal;
+  document.getElementById('lbl-fname').textContent       = t.lblFname;
+  document.getElementById('lbl-lname').textContent       = t.lblLname;
+  document.getElementById('lbl-email').textContent       = t.lblEmail;
+  document.getElementById('lbl-phone').textContent       = t.lblPhone;
+  document.getElementById('lbl-service').textContent     = t.lblService;
+  document.getElementById('svc-ph').textContent          = t.svcPH;
+  document.getElementById('lbl-consent-hdr').innerHTML   = t.lblConsentHdr;
+  document.getElementById('lbl-scroll-hint').textContent = t.lblScrollHint;
+  document.getElementById('lbl-agree').textContent       = t.lblAgree;
+  document.getElementById('addendum-title').textContent  = t.addendumTitle;
+  document.getElementById('lbl-sig-hdr').textContent     = t.lblSigHdr;
+  document.getElementById('lbl-sig-inst').textContent    = t.lblSigInst;
+  document.getElementById('lbl-sign-here').textContent   = t.lblSignHere;
+  document.getElementById('lbl-clear').textContent       = t.lblClear;
+  document.getElementById('sigError').textContent        = t.sigErrMsg;
+  document.getElementById('err-fname').textContent       = t.errRequired;
+  document.getElementById('err-lname').textContent       = t.errRequired;
+  document.getElementById('err-email').textContent       = t.errEmail;
+  document.getElementById('err-service').textContent     = t.errRequired;
+  document.getElementById('err-date').textContent        = t.errRequired;
+  document.getElementById('lbl-date').textContent        = t.lblDate;
+  document.getElementById('lbl-loc').textContent         = t.lblLoc;
+  document.getElementById('btn-submit-lbl').innerHTML    = t.btnSubmit;
+  document.getElementById('suc-title').textContent       = t.sucTitle;
+  document.getElementById('suc-body').textContent        = t.sucBody;
+  document.getElementById('suc-btn').textContent         = t.sucBtn;
+  document.getElementById('consentBox').innerHTML        = t.consent;
+
+  // Update service option labels
+  const keys = ['general','massage','facial','laser','wax','botox','iv'];
+  keys.forEach(k => {
+    const el = document.getElementById('svc-'+k);
+    if (el) el.textContent = t.svcLabels[k];
+  });
+
+  // Re-render addendum in new language
+  renderAddendum(currentService);
 }
 
+function onServiceChange() {
+  currentService = document.getElementById('service').value;
+  renderAddendum(currentService);
+}
+
+function renderAddendum(svcKey) {
+  const box     = document.getElementById('addendumBox');
+  const content = document.getElementById('addendumContent');
+  const title   = document.getElementById('addendum-title');
+  const t       = T[lang];
+  const data    = ADDENDA[lang][svcKey];
+
+  if (!svcKey || !data) {
+    box.classList.remove('visible');
+    content.innerHTML = '';
+    return;
+  }
+  title.textContent  = data.title;
+  content.innerHTML  = data.html;
+  box.classList.add('visible');
+}
+
+// Init
 setLang('en');
 document.getElementById('sigDate').value = new Date().toISOString().split('T')[0];
 
-/* ── Signature pad ────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   SIGNATURE PAD
+   ═══════════════════════════════════════════════════════════ */
 const canvas = document.getElementById('sigCanvas');
 const ctx    = canvas.getContext('2d');
 let drawing  = false, hasSig = false;
 
 function resizeCanvas() {
-  const r = window.devicePixelRatio || 1;
+  const r    = window.devicePixelRatio || 1;
   const rect = canvas.getBoundingClientRect();
   canvas.width  = rect.width  * r;
   canvas.height = rect.height * r;
   ctx.scale(r, r);
   ctx.strokeStyle = '#2e2e2e';
-  ctx.lineWidth = 1.8;
+  ctx.lineWidth   = 1.8;
   ctx.lineCap = ctx.lineJoin = 'round';
 }
 resizeCanvas();
@@ -429,9 +606,9 @@ canvas.addEventListener('mousedown',  e => { drawing=true; const p=pos(e); ctx.b
 canvas.addEventListener('mousemove',  e => { if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); markSig(); });
 canvas.addEventListener('mouseup',    ()  => drawing=false);
 canvas.addEventListener('mouseleave', ()  => drawing=false);
-canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }, {passive:false});
-canvas.addEventListener('touchmove',  e => { e.preventDefault(); if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); markSig(); }, {passive:false});
-canvas.addEventListener('touchend',   e => { e.preventDefault(); drawing=false; }, {passive:false});
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); },{passive:false});
+canvas.addEventListener('touchmove',  e => { e.preventDefault(); if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); markSig(); },{passive:false});
+canvas.addEventListener('touchend',   e => { e.preventDefault(); drawing=false; },{passive:false});
 
 function markSig() {
   hasSig = true;
@@ -445,7 +622,9 @@ function clearSignature() {
   document.getElementById('sigPlaceholder').style.opacity = '1';
 }
 
-/* ── Validation ───────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   VALIDATION
+   ═══════════════════════════════════════════════════════════ */
 function validate() {
   let ok = true;
   function chk(id, fn) {
@@ -463,14 +642,24 @@ function validate() {
     ok = false;
     const cb = document.getElementById('agreeCheck');
     cb.style.outline = '2px solid #c0392b';
-    setTimeout(()=>cb.style.outline='', 2000);
+    setTimeout(()=>cb.style.outline='',2000);
   }
   if (!hasSig) { document.getElementById('sigError').style.display='block'; ok=false; }
   return ok;
 }
 
-/* ── PDF generation ───────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════
+   PDF GENERATION
+   ═══════════════════════════════════════════════════════════ */
 let pdfBlob = null;
+
+// Strip HTML tags for PDF plain text
+function stripHtml(html) {
+  return html.replace(/<h3[^>]*>/gi,'').replace(/<\/h3>/gi,' — ')
+    .replace(/<p[^>]*>/gi,'').replace(/<\/p>/gi,' ')
+    .replace(/<br\s*\/?>/gi,' ').replace(/&amp;/g,'&')
+    .replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/<[^>]+>/g,'').trim();
+}
 
 function buildPDF() {
   const { jsPDF } = window.jspdf;
@@ -480,7 +669,8 @@ function buildPDF() {
   const lastName  = document.getElementById('lastName').value.trim();
   const email     = document.getElementById('email').value.trim();
   const phone     = document.getElementById('phone').value.trim();
-  const service   = document.getElementById('service').value;
+  const svcKey    = document.getElementById('service').value;
+  const svcLabel  = svcKey ? t.svcLabels[svcKey] : '—';
   const sigDate   = document.getElementById('sigDate').value;
   const location  = document.getElementById('location').value.trim() || 'San José, Costa Rica';
   const formatted = new Date(sigDate+'T12:00:00').toLocaleDateString(
@@ -489,7 +679,7 @@ function buildPDF() {
   const M=22, W=210;
   let y=M;
 
-  // Header bar
+  // Header
   doc.setFillColor(61,107,94);
   doc.rect(0,0,W,40,'F');
   doc.setTextColor(255,255,255);
@@ -502,6 +692,7 @@ function buildPDF() {
   y = 52;
 
   function sectionHead(label) {
+    if (y>260){doc.addPage();y=M;}
     doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(61,107,94);
     doc.text(label, M, y); y+=5;
     doc.setDrawColor(221,213,202); doc.line(M,y,W-M,y); y+=8;
@@ -512,58 +703,83 @@ function buildPDF() {
     doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(40,40,40);
     doc.text(value||'—', M+42, y); y+=9;
   }
+  function printSection(heading, body) {
+    if (y>255){doc.addPage();y=M;}
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(61,107,94);
+    doc.text(heading, M, y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setTextColor(70,70,70);
+    const lines = doc.splitTextToSize(body, W-M*2);
+    lines.forEach(line => {
+      if (y>278){doc.addPage();y=M;}
+      doc.text(line, M, y); y+=4.5;
+    });
+    y+=4;
+  }
 
   sectionHead(lang==='es'?'INFORMACIÓN DEL CLIENTE':'CLIENT INFORMATION');
   infoRow(lang==='es'?'Nombre:':'Full Name:', firstName+' '+lastName);
   infoRow('Email:', email);
   infoRow(lang==='es'?'Teléfono:':'Phone:', phone||'—');
-  infoRow(lang==='es'?'Categoría:':'Category:', service);
+  infoRow(lang==='es'?'Categoría:':'Category:', svcLabel);
   y+=6;
 
   sectionHead(lang==='es'?'CONSENTIMIENTO Y ACUERDO':'CONSENT & AGREEMENT');
 
-  const sections = lang==='es' ? [
+  const generalSections = lang==='es' ? [
     ['1. PROPÓSITO DE LA VISITA','Entiendo que los servicios proporcionados en este centro de bienestar pueden incluir masajes, tratamientos faciales y de la piel, tratamientos láser u otros procedimientos estéticos, tratamientos inyectables (como toxina botulínica) y sueroterapia / terapia intravenosa, entre otros. Entiendo que muchos de estos servicios son electivos y tienen como objetivo promover la relajación, la apariencia y el bienestar general, y no sustituyen la atención médica continua con mi médico.'],
     ['2. INFORMACIÓN MÉDICA Y RESPONSABILIDAD','Certifico que la información médica y personal que he proporcionado es completa y veraz, incluyendo mis medicamentos, alergias, enfermedades y si estoy embarazada o en período de lactancia. Acepto informar al personal sobre cualquier cambio en mi salud, medicamentos o estado de embarazo antes de cada tratamiento.'],
-    ['3. RIESGOS GENERALES Y AUSENCIA DE GARANTÍAS','Entiendo que todos los tratamientos pueden implicar riesgos, incluyendo, entre otros, molestias, moretes, enrojecimiento o hinchazón temporal, reacciones alérgicas o de sensibilidad, infección y resultados insatisfactorios. Entiendo que no se puede garantizar un resultado específico y que los resultados pueden variar de una persona a otra.'],
-    ['4. DERECHO A HACER PREGUNTAS Y A NEGARSE','Entiendo que tengo derecho a hacer preguntas sobre mi tratamiento en cualquier momento y a recibir respuestas en un lenguaje que pueda comprender. Entiendo que puedo negarme o suspender cualquier tratamiento en cualquier momento, incluso después de firmar este formulario, y que dicha negativa no afectará mi derecho a recibir atención futura en este centro.'],
-    ['5. FOTOGRAFÍAS E HISTORIAS CLÍNICAS (SOLO USO CLÍNICO)','Entiendo que el centro puede tomar fotografías clínicas para documentar mi condición antes, durante y después del tratamiento. Estas imágenes se guardarán de forma confidencial en mi expediente y se utilizarán solo con fines clínicos y de control de calidad, a menos que firme una autorización separada para uso con fines de mercadeo o educativos.'],
-    ['6. PRIVACIDAD Y COMUNICACIÓN','Autorizo al centro de bienestar a utilizar y divulgar mi información de salud y contacto para fines de tratamiento, facturación y operaciones de atención médica, de acuerdo con las leyes de privacidad aplicables. Autorizo que se comuniquen conmigo por teléfono, mensajes de texto, correo electrónico o aplicaciones de mensajería que proporcione, para recordatorios de citas y seguimientos.'],
-    ['7. RESPONSABILIDAD ECONÓMICA Y POLÍTICA DE CANCELACIÓN','Entiendo que soy responsable económicamente de todos los cargos que no estén cubiertos por seguros u otros terceros pagadores. Las cancelaciones deben hacerse preferiblemente con 24 horas de anticipación. Si se cancela dentro de las 24 horas previas a la cita, o en caso de no presentarse, se me puede requerir el pago de un depósito del 50% no reembolsable antes de programar otra cita.'],
-    ['8. CONSENTIMIENTO PARA TRATAMIENTO','Reconozco que he leído y comprendido este Consentimiento General y Reconocimiento. He tenido la oportunidad de hacer preguntas y todas mis preguntas han sido respondidas a mi entera satisfacción. Por este medio otorgo voluntariamente mi consentimiento para recibir servicios en este centro de bienestar, según lo recomiende el profesional.'],
+    ['3. RIESGOS GENERALES Y AUSENCIA DE GARANTÍAS','Entiendo que todos los tratamientos pueden implicar riesgos, incluyendo, entre otros: molestias, moretes, enrojecimiento o hinchazón temporal, reacciones alérgicas o de sensibilidad, infección y resultados insatisfactorios. Entiendo que no se puede garantizar un resultado específico y que los resultados pueden variar de una persona a otra.'],
+    ['4. DERECHO A HACER PREGUNTAS Y A NEGARSE','Entiendo que tengo derecho a hacer preguntas sobre mi tratamiento en cualquier momento y a recibir respuestas en un lenguaje que pueda comprender. Entiendo que puedo negarme o suspender cualquier tratamiento en cualquier momento, incluso después de firmar este formulario, sin afectar mi derecho a recibir atención futura en este centro.'],
+    ['5. FOTOGRAFÍAS E HISTORIAS CLÍNICAS (SOLO USO CLÍNICO)','Entiendo que el centro puede tomar fotografías clínicas para documentar mi condición antes, durante y después del tratamiento. Estas imágenes se guardarán de forma confidencial y se utilizarán únicamente con fines clínicos y de control de calidad, salvo autorización expresa por escrito para uso con fines de mercadeo o educativos.'],
+    ['6. PRIVACIDAD Y COMUNICACIÓN','Autorizo al centro de bienestar a utilizar y divulgar mi información de salud y contacto para fines de tratamiento, facturación y operaciones, de acuerdo con las leyes de privacidad aplicables. Autorizo que se comuniquen conmigo por teléfono, mensajes de texto, correo electrónico o aplicaciones de mensajería para recordatorios de citas y seguimientos.'],
+    ['7. RESPONSABILIDAD ECONÓMICA Y POLÍTICA DE CANCELACIÓN','Soy responsable económicamente de todos los cargos aplicables. Las cancelaciones deben realizarse preferiblemente con al menos 24 horas de anticipación. Las cancelaciones dentro de las 24 horas previas a la cita o la inasistencia sin previo aviso pueden generar la obligación de pagar un depósito no reembolsable del 50% antes de programar una nueva cita.'],
+    ['8. CONSENTIMIENTO PARA TRATAMIENTO','Reconozco que he leído y comprendido este Consentimiento General y Reconocimiento. He tenido la oportunidad de hacer preguntas y todas han sido respondidas a mi entera satisfacción. Por este medio otorgo voluntariamente mi consentimiento para recibir servicios en este centro de bienestar, según lo recomiende el profesional.'],
+    ['9. ASIGNACIÓN DE PERSONAL Y PRESTACIÓN DEL SERVICIO','Entiendo y acepto que todos los paquetes de tratamientos y servicios son adquiridos de Brisa Medical Spa & Wellness Center ("Brisa"), y que la relación contractual existe únicamente entre Brisa y el cliente, y no entre el cliente y ningún empleado, terapeuta, técnico o prestador individual. Brisa realizará esfuerzos razonables para atender la preferencia del cliente por un prestador/a en particular cuando así se solicite, pero no garantiza la disponibilidad de ningún prestador/a específico. Brisa podrá asignar, reasignar o sustituir a cualquier miembro calificado de su personal por motivos de agenda, operación, disponibilidad, licencias, terminación laboral u otra razón comercial legítima, siempre que la persona sustituta esté debidamente autorizada y calificada. La solicitud de un prestador/a en particular constituye únicamente una preferencia del cliente y no genera un derecho personal a ser atendido por dicho individuo, ni constituye una condición esencial del servicio o paquete adquirido.'],
   ] : [
-    ['1. PURPOSE OF VISIT','I understand that the services provided at this wellness center may include massage therapy, skin-care treatments, laser and other aesthetic procedures, injectable treatments (such as botulinum toxin) and IV therapy, among others. Many of these services are elective and are not a substitute for ongoing medical care with my physician.'],
+    ['1. PURPOSE OF VISIT','I understand that the services provided at this wellness center may include massage therapy, skin-care treatments, laser and other aesthetic procedures, injectable treatments (such as botulinum toxin), and IV therapy, among others. Many of these services are elective and are not a substitute for ongoing medical care with my physician.'],
     ['2. MEDICAL INFORMATION AND RESPONSIBILITY','I certify that the medical and personal information I have provided is complete and accurate, including medications, allergies, medical conditions, and pregnancy or breastfeeding status. I agree to inform the staff of any changes to my health or medications before each treatment.'],
-    ['3. GENERAL RISKS AND NO GUARANTEES','I understand that all treatments may have risks, including but not limited to discomfort, bruising, temporary redness or swelling, allergic or sensitivity reactions, infection, and unsatisfactory results. No specific result can be guaranteed and results may vary from person to person.'],
+    ['3. GENERAL RISKS AND NO GUARANTEES','I understand that all treatments may carry risks, including but not limited to discomfort, bruising, temporary redness or swelling, allergic or sensitivity reactions, infection, and unsatisfactory results. No specific outcome can be guaranteed and results may vary from person to person.'],
     ['4. RIGHT TO ASK QUESTIONS AND TO REFUSE','I understand that I have the right to ask questions about my treatment at any time and may refuse or discontinue any treatment at any time, even after signing this form, without affecting my right to future care at this center.'],
-    ['5. PHOTOGRAPHY AND RECORDS (CLINICAL ONLY)','I understand that the center may take clinical photographs to document my condition before, during, and after treatment. These images will be stored confidentially and used only for clinical and quality-assurance purposes, unless I sign a separate authorization for marketing or educational use.'],
-    ['6. PRIVACY AND COMMUNICATION','I authorize the wellness center to use and disclose my health and contact information for treatment, billing, and healthcare operations, consistent with applicable privacy laws. I consent to be contacted by phone, text, email or messaging apps for appointment reminders and follow-ups.'],
-    ['7. FINANCIAL RESPONSIBILITY AND CANCELLATION POLICY','I am financially responsible for all applicable charges. Cancellations should preferably be made 24 hours prior to the appointment. Cancellations within 24 hours or no-shows may require a non-refundable 50% deposit to reschedule.'],
-    ['8. CONSENT TO TREATMENT','I acknowledge that I have read and understood this General Consent and Acknowledgment, have had the opportunity to ask questions, and hereby voluntarily consent to receive services at this wellness center as recommended by the provider.'],
+    ['5. PHOTOGRAPHY AND RECORDS (CLINICAL ONLY)','I understand that the center may take clinical photographs to document my condition before, during, and after treatment. These images will be stored confidentially and used solely for clinical and quality-assurance purposes, unless I sign a separate written authorization for marketing or educational use.'],
+    ['6. PRIVACY AND COMMUNICATION','I authorize the wellness center to use and disclose my health and contact information for treatment, billing, and healthcare operations, consistent with applicable privacy laws. I consent to be contacted by phone, text, email, or messaging applications for appointment reminders and follow-ups.'],
+    ['7. FINANCIAL RESPONSIBILITY AND CANCELLATION POLICY','I am financially responsible for all applicable charges. Cancellations should preferably be made at least 24 hours prior to the appointment. Cancellations within 24 hours or no-shows may require a non-refundable 50% deposit before scheduling a future appointment.'],
+    ['8. CONSENT TO TREATMENT','I acknowledge that I have read and understood this General Consent and Acknowledgment, have had the opportunity to ask questions, and hereby voluntarily consent to receive services at this wellness center as recommended by my provider.'],
+    ['9. STAFFING AND PROVIDER ASSIGNMENT','I understand and agree that all treatment packages and services are purchased from Brisa Medical Spa & Wellness Center ("Brisa"), and that the contractual relationship exists solely between Brisa and me, and not between me and any individual employee, therapist, technician, or provider. While Brisa will make reasonable efforts to accommodate my preference for a particular provider when requested, Brisa does not guarantee the availability of any specific provider for any scheduled service, package session, or future appointment. Brisa may assign, reassign, or substitute any qualified member of its staff whenever reasonably necessary for scheduling, operational, staffing, leave of absence, separation of employment, or any other legitimate business reason, provided the substitute is duly authorized and qualified. A request for a particular provider constitutes a preference only and does not create a personal right to be treated by that individual, nor does it constitute a material term of the purchased service or package.'],
   ];
 
-  doc.setFontSize(8.5);
-  for (const [heading, body] of sections) {
-    if (y > 252) { doc.addPage(); y = M; }
-    doc.setFont('helvetica','bold'); doc.setTextColor(61,107,94);
-    doc.text(heading, M, y); y+=5;
-    doc.setFont('helvetica','normal'); doc.setTextColor(70,70,70);
-    const lines = doc.splitTextToSize(body, W-M*2);
-    doc.text(lines, M, y); y += lines.length*4.5+5;
+  generalSections.forEach(([h,b]) => printSection(h,b));
+
+  // Service-specific addendum
+  const addData = ADDENDA[lang][svcKey];
+  if (addData) {
+    y+=4;
+    sectionHead((lang==='es'?'CONSENTIMIENTO ADICIONAL:':'ADDITIONAL CONSENT:') + ' ' + addData.title.toUpperCase());
+    const plain = stripHtml(addData.html);
+    // Split by ' — ' to get paragraphs
+    const paras = plain.split(' — ').map(s=>s.trim()).filter(Boolean);
+    paras.forEach(para => {
+      const lines = doc.splitTextToSize(para, W-M*2);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(70,70,70);
+      lines.forEach(line => {
+        if(y>278){doc.addPage();y=M;}
+        doc.text(line,M,y); y+=4.5;
+      });
+      y+=3;
+    });
   }
 
   // Agreement confirmation
   y+=4;
-  if (y>260){doc.addPage();y=M;}
+  if(y>268){doc.addPage();y=M;}
   doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(61,107,94);
-  doc.text(lang==='es'?'✓ Cliente confirmó acuerdo con los términos anteriores.':'✓ Client confirmed agreement to the above terms.', M, y);
+  doc.text(lang==='es'?'✓ Cliente confirmó acuerdo con todos los términos anteriores.':'✓ Client confirmed agreement to all terms above.', M, y);
   y+=14;
 
   // Signature
-  if (y>230){doc.addPage();y=M;}
+  if(y>230){doc.addPage();y=M;}
   sectionHead(lang==='es'?'FIRMA':'SIGNATURE');
-  doc.setDrawColor(200,200,200); doc.rect(M, y, 100, 35);
-  doc.addImage(canvas.toDataURL('image/png'),'PNG', M, y, 100, 35);
+  doc.setDrawColor(200,200,200); doc.rect(M,y,100,35);
+  doc.addImage(canvas.toDataURL('image/png'),'PNG',M,y,100,35);
   y+=40;
   doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(40,40,40);
   doc.text(firstName+' '+lastName, M, y);
@@ -572,7 +788,11 @@ function buildPDF() {
   doc.text((lang==='es'?'Lugar: ':'Location: ')+location, M, y);
 
   // Footer
-  doc.setDrawColor(221,213,202); doc.line(M,277,W-M,277);
+  if(y<272){ y=272; }
+  doc.setDrawColor(221,213,202);
+  const lastPage = doc.internal.getNumberOfPages();
+  doc.setPage(lastPage);
+  doc.line(M,277,W-M,277);
   doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(160,160,160);
   doc.text('Brisa Medical Spa & Wellness Center  ·  '+(lang==='es'?'Firmado digitalmente el ':'Digitally signed on ')+formatted, M, 283);
 
@@ -583,8 +803,7 @@ function submitForm() {
   if (!validate()) return;
   pdfBlob = buildPDF().output('blob');
   document.getElementById('formSection').style.display = 'none';
-  const s = document.getElementById('successScreen');
-  s.style.display = 'flex';
+  document.getElementById('successScreen').style.display = 'flex';
 }
 
 function downloadPDF() {
