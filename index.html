@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brisa Medical Spa & Wellness Center — Consent Form</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ═══════════════════════════════════════════════════════
+       BRAND COLORS
+       To match your Framer site, replace the 6 hex values below.
+       How to find your colors: In Framer, click any colored element
+       → check the Fill panel on the right → copy the hex code.
+       ═══════════════════════════════════════════════════════ */
+    :root {
+      --primary:    #3d6b5e;   /* header bar, buttons, section labels  */
+      --primary-dk: #2c4f45;   /* button hover                         */
+      --accent:     #a07850;   /* "clear signature" link               */
+      --bg:         #f6f2ed;   /* page + consent box background        */
+      --border:     #ddd5ca;   /* dividers and field underlines        */
+      --text:       #2e2e2e;   /* body text                            */
+      --text-muted: #777777;   /* secondary / hint text                */
+      --surface:    #ffffff;   /* card background                      */
+    }
+
+    html, body { min-height:100%; background:var(--bg); color:var(--text);
+      font-family:'Jost',sans-serif; font-weight:300; }
+
+    .page { min-height:100vh; display:flex; flex-direction:column;
+      align-items:center; padding:40px 16px 80px; }
+
+    .card { width:100%; max-width:700px; background:var(--surface);
+      border-radius:3px; box-shadow:0 2px 48px rgba(0,0,0,0.08); overflow:hidden; }
+
+    /* Header */
+    .card-header { background:var(--primary); padding:40px 48px 34px;
+      position:relative; overflow:hidden; }
+    .card-header::before { content:''; position:absolute; right:-50px; top:-50px;
+      width:200px; height:200px; border-radius:50%; background:rgba(255,255,255,0.05); }
+    .center-name { font-family:'Cormorant Garamond',serif; font-size:11px;
+      letter-spacing:0.26em; text-transform:uppercase; color:rgba(255,255,255,0.55);
+      margin-bottom:10px; font-weight:400; }
+    .card-header h1 { font-family:'Cormorant Garamond',serif; font-size:28px;
+      font-weight:300; color:#fff; line-height:1.25; }
+    .card-header p { margin-top:10px; font-size:13px; color:rgba(255,255,255,0.6);
+      line-height:1.65; max-width:440px; }
+
+    /* Language toggle */
+    .lang-bar { display:flex; justify-content:flex-end; padding:14px 48px;
+      border-bottom:1px solid var(--border); background:var(--surface); gap:0; }
+    .lang-btn { padding:6px 20px; font-family:'Jost',sans-serif; font-size:11px;
+      letter-spacing:0.14em; text-transform:uppercase; font-weight:500; cursor:pointer;
+      border:1px solid var(--border); background:transparent; color:var(--text-muted);
+      transition:all 0.18s; }
+    .lang-btn:first-child { border-radius:2px 0 0 2px; border-right:none; }
+    .lang-btn:last-child  { border-radius:0 2px 2px 0; }
+    .lang-btn.active { background:var(--primary); border-color:var(--primary); color:#fff; }
+
+    /* Form body */
+    .card-body { padding:44px 48px; }
+    .section-label { font-size:10px; letter-spacing:0.22em; text-transform:uppercase;
+      color:var(--primary); font-weight:500; margin-bottom:22px; }
+    .field-group { margin-bottom:28px; }
+    label { display:block; font-size:11px; letter-spacing:0.1em; text-transform:uppercase;
+      color:var(--primary-dk); margin-bottom:8px; font-weight:500; }
+    input[type="text"], input[type="email"], input[type="date"], select {
+      width:100%; border:none; border-bottom:1px solid var(--border); background:transparent;
+      padding:10px 0; font-family:'Jost',sans-serif; font-size:15px; font-weight:300;
+      color:var(--text); outline:none; transition:border-color 0.2s;
+      appearance:none; border-radius:0; }
+    input:focus, select:focus { border-bottom-color:var(--primary); }
+    input[type="date"]::-webkit-calendar-picker-indicator { opacity:0.35; cursor:pointer; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+    .divider { border:none; border-top:1px solid var(--border); margin:36px 0; }
+
+    /* Consent scroll box */
+    .consent-scroll { background:var(--bg); border-left:3px solid var(--primary);
+      border-radius:0 2px 2px 0; padding:22px 24px; max-height:300px; overflow-y:auto;
+      margin-bottom:20px; font-size:13px; line-height:1.8; color:#555; }
+    .consent-scroll::-webkit-scrollbar { width:5px; }
+    .consent-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+    .consent-scroll h3 { font-family:'Jost',sans-serif; font-size:11px; font-weight:500;
+      letter-spacing:0.1em; text-transform:uppercase; color:var(--primary-dk);
+      margin:18px 0 6px; }
+    .consent-scroll h3:first-child { margin-top:0; }
+    .consent-scroll p { margin-bottom:5px; }
+    .scroll-hint { font-size:11px; color:var(--text-muted); text-align:right;
+      margin-bottom:14px; letter-spacing:0.04em; }
+
+    /* Checkbox */
+    .check-row { display:flex; align-items:flex-start; gap:12px; margin-bottom:8px; }
+    .check-row input[type="checkbox"] { width:17px; height:17px; margin-top:2px;
+      accent-color:var(--primary); cursor:pointer; flex-shrink:0; }
+    .check-row span { font-size:13px; line-height:1.6; color:#555; }
+
+    /* Signature */
+    .sig-wrapper { position:relative; border:1px solid var(--border); border-radius:2px;
+      background:var(--surface); margin-bottom:10px; }
+    #sigCanvas { display:block; width:100%; height:160px; cursor:crosshair; touch-action:none; }
+    .sig-baseline { position:absolute; bottom:36px; left:24px; right:24px;
+      border-bottom:1px solid var(--border); pointer-events:none; }
+    .sig-placeholder { position:absolute; inset:0; display:flex; align-items:center;
+      justify-content:center; pointer-events:none; transition:opacity 0.25s; }
+    .sig-placeholder span { font-family:'Cormorant Garamond',serif; font-style:italic;
+      font-size:17px; color:var(--border); }
+    .sig-actions { display:flex; justify-content:flex-end; margin-bottom:4px; }
+    .btn-clear { background:none; border:none; font-family:'Jost',sans-serif; font-size:11px;
+      letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); cursor:pointer;
+      padding:4px 0; transition:opacity 0.2s; }
+    .btn-clear:hover { opacity:0.6; }
+    .sig-err { display:none; font-size:11px; color:#c0392b; margin-bottom:8px; }
+
+    /* Date row */
+    .date-row { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:24px; }
+
+    /* Error states */
+    .error-msg { display:none; font-size:11px; color:#c0392b; margin-top:5px; }
+    .field-error .error-msg { display:block; }
+    .field-error input, .field-error select { border-bottom-color:#c0392b; }
+
+    /* Submit */
+    .btn-submit { width:100%; margin-top:40px; padding:18px; background:var(--primary);
+      color:#fff; border:none; border-radius:2px; font-family:'Jost',sans-serif;
+      font-size:11px; letter-spacing:0.22em; text-transform:uppercase; cursor:pointer;
+      transition:background 0.2s, transform 0.1s; }
+    .btn-submit:hover  { background:var(--primary-dk); }
+    .btn-submit:active { transform:scale(0.99); }
+
+    /* Success */
+    #successScreen { display:none; flex-direction:column; align-items:center;
+      padding:80px 48px; text-align:center; }
+    .success-icon { width:60px; height:60px; border-radius:50%; background:var(--primary);
+      display:flex; align-items:center; justify-content:center; margin-bottom:28px; }
+    .success-icon svg { width:26px; height:26px; stroke:#fff; fill:none; stroke-width:2.5; }
+    #successScreen h2 { font-family:'Cormorant Garamond',serif; font-size:28px;
+      font-weight:300; margin-bottom:12px; }
+    #successScreen p { font-size:14px; color:var(--text-muted); line-height:1.7; max-width:380px; }
+    .btn-download { margin-top:30px; padding:14px 36px; background:var(--primary); color:#fff;
+      border:none; border-radius:2px; font-family:'Jost',sans-serif; font-size:11px;
+      letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:background 0.2s; }
+    .btn-download:hover { background:var(--primary-dk); }
+
+    @media (max-width:560px) {
+      .card-header,.card-body { padding-left:24px; padding-right:24px; }
+      .lang-bar { padding-left:24px; padding-right:24px; }
+      .two-col,.date-row { grid-template-columns:1fr; gap:20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+<div class="card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="center-name">Brisa Medical Spa &amp; Wellness Center</div>
+    <h1 id="hdr-title">General Consent &amp;<br/>Acknowledgment</h1>
+    <p id="hdr-sub">Please complete this form before your appointment. All information is kept confidential and stored securely in your client profile.</p>
+  </div>
+
+  <!-- Language toggle -->
+  <div class="lang-bar">
+    <button class="lang-btn active" onclick="setLang('en')" id="btn-en">English</button>
+    <button class="lang-btn"        onclick="setLang('es')" id="btn-es">Español</button>
+  </div>
+
+  <!-- Form -->
+  <div class="card-body" id="formSection">
+
+    <div class="section-label" id="lbl-personal">Personal Information</div>
+
+    <div class="two-col field-group">
+      <div class="field" id="field-firstName">
+        <label id="lbl-fname">First Name</label>
+        <input type="text" id="firstName" placeholder="Ana"/>
+        <div class="error-msg" id="err-fname">Required</div>
+      </div>
+      <div class="field" id="field-lastName">
+        <label id="lbl-lname">Last Name</label>
+        <input type="text" id="lastName" placeholder="García"/>
+        <div class="error-msg" id="err-lname">Required</div>
+      </div>
+    </div>
+
+    <div class="two-col field-group">
+      <div class="field" id="field-email">
+        <label id="lbl-email">Email</label>
+        <input type="email" id="email" placeholder="ana@example.com"/>
+        <div class="error-msg" id="err-email">Valid email required</div>
+      </div>
+      <div class="field">
+        <label id="lbl-phone">Phone</label>
+        <input type="text" id="phone" placeholder="+506 8888-0000"/>
+      </div>
+    </div>
+
+    <div class="field-group" id="field-service">
+      <label id="lbl-service">Service Category</label>
+      <select id="service">
+        <option value="" id="svc-ph">— Select a category —</option>
+        <option value="General">General</option>
+        <option value="Masaje y Trabajo Corporal">Masaje y Trabajo Corporal</option>
+        <option value="Tratamientos Faciales y de la Piel">Tratamientos Faciales y de la Piel</option>
+        <option value="Tratamientos Láser">Tratamientos Láser</option>
+        <option value="Tratamientos con Cera">Tratamientos con Cera</option>
+        <option value="Tratamientos con Botox">Tratamientos con Botox</option>
+        <option value="Sueroterapia">Sueroterapia</option>
+      </select>
+      <div class="error-msg" id="err-service">Required</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section-label" id="lbl-consent-hdr">Consent &amp; Agreement</div>
+    <div class="scroll-hint" id="lbl-scroll-hint">↕ Scroll to read the full agreement</div>
+    <div class="consent-scroll" id="consentBox"></div>
+
+    <div class="check-row">
+      <input type="checkbox" id="agreeCheck"/>
+      <span id="lbl-agree">I have read and agree to the General Consent and Acknowledgment above.</span>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="section-label" id="lbl-sig-hdr">Signature</div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;" id="lbl-sig-inst">
+      Please sign below using your finger, stylus, or mouse.
+    </p>
+
+    <div class="sig-wrapper">
+      <canvas id="sigCanvas"></canvas>
+      <div class="sig-baseline"></div>
+      <div class="sig-placeholder" id="sigPlaceholder">
+        <span id="lbl-sign-here">Sign here</span>
+      </div>
+    </div>
+    <div class="sig-actions">
+      <button class="btn-clear" type="button" onclick="clearSignature()" id="lbl-clear">Clear signature</button>
+    </div>
+    <div class="sig-err" id="sigError">Signature is required.</div>
+
+    <div class="date-row">
+      <div class="field" id="field-sigDate">
+        <label id="lbl-date">Date</label>
+        <input type="date" id="sigDate"/>
+        <div class="error-msg" id="err-date">Required</div>
+      </div>
+      <div class="field">
+        <label id="lbl-loc">Location (optional)</label>
+        <input type="text" id="location" placeholder="San José, Costa Rica"/>
+      </div>
+    </div>
+
+    <button class="btn-submit" type="button" onclick="submitForm()" id="btn-submit-lbl">
+      Complete &amp; Download Signed Form
+    </button>
+
+  </div>
+
+  <!-- Success -->
+  <div id="successScreen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2 id="suc-title">Form Complete</h2>
+    <p id="suc-body">Thank you. Your signed consent form has been saved. Please hand the device back to our team, or download a copy for your records.</p>
+    <button class="btn-download" onclick="downloadPDF()" id="suc-btn">Download PDF Copy</button>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* ── Bilingual content ────────────────────────────── */
+const T = {
+  en: {
+    hdrTitle:'General Consent &amp;<br/>Acknowledgment',
+    hdrSub:'Please complete this form before your appointment. All information is kept confidential and stored securely in your client profile.',
+    lblPersonal:'Personal Information', lblFname:'First Name', lblLname:'Last Name',
+    lblEmail:'Email', lblPhone:'Phone', lblService:'Service Category',
+    svcPH:'— Select a category —', lblConsentHdr:'Consent &amp; Agreement',
+    lblScrollHint:'↕ Scroll to read the full agreement',
+    lblAgree:'I have read and agree to the General Consent and Acknowledgment above.',
+    lblSigHdr:'Signature', lblSigInst:'Please sign below using your finger, stylus, or mouse.',
+    lblSignHere:'Sign here', lblClear:'Clear signature', sigErrMsg:'Signature is required.',
+    errRequired:'Required', errEmail:'Valid email required',
+    lblDate:'Date', lblLoc:'Location (optional)',
+    btnSubmit:'Complete &amp; Download Signed Form',
+    sucTitle:'Form Complete',
+    sucBody:'Thank you. Your signed consent form has been saved. Please hand the device back to our team, or download a copy for your records.',
+    sucBtn:'Download PDF Copy',
+    consent:`
+      <h3>1. Purpose of Visit</h3>
+      <p>I understand that the services provided at this wellness center may include massage therapy, skin-care treatments, laser and other aesthetic procedures, injectable treatments (such as botulinum toxin) and IV therapy, among others.</p>
+      <p>I understand that many of these services are elective and are intended to promote relaxation, appearance, and general wellness, and are not a substitute for ongoing medical care with my physician.</p>
+      <h3>2. Medical Information and Responsibility</h3>
+      <p>I certify that the medical and personal information I have provided is complete and accurate, including medications, allergies, medical conditions, and pregnancy or breastfeeding status.</p>
+      <p>I agree to inform the staff of any changes to my health, medications, or pregnancy status before each treatment.</p>
+      <h3>3. General Risks and No Guarantees</h3>
+      <p>I understand that all treatments may have risks, including but not limited to discomfort, bruising, temporary redness or swelling, allergic or sensitivity reactions, infection, and unsatisfactory results.</p>
+      <p>I understand that no specific result can be guaranteed and that results may vary from person to person.</p>
+      <h3>4. Right to Ask Questions and to Refuse</h3>
+      <p>I understand that I have the right to ask questions about my treatment at any time, and to receive answers in language I can understand.</p>
+      <p>I understand that I may refuse or discontinue any treatment at any time, even after signing this form, and that such refusal will not affect my right to future care at this center, except where a particular treatment is necessary to proceed.</p>
+      <h3>5. Photography and Records (Clinical Only)</h3>
+      <p>I understand that the center may take clinical photographs to document my condition before, during, and after treatment. These images will be stored in my confidential record and used only for clinical and quality-assurance purposes, unless I sign a separate authorization for marketing or educational use.</p>
+      <h3>6. Privacy and Communication</h3>
+      <p>I authorize the wellness center to use and disclose my health and contact information for purposes of treatment, billing, and healthcare operations, consistent with applicable privacy laws. I understand that I may request limits on certain uses and disclosures.</p>
+      <p>I consent to be contacted by phone, text message, email or messaging apps I provide for appointment reminders, follow-ups and limited educational information. I understand that electronic communications may carry some risk of unauthorized access.</p>
+      <h3>7. Financial Responsibility and Cancellation Policy</h3>
+      <p>I understand that I am financially responsible for all charges not covered by any insurance or third-party payer, if applicable.</p>
+      <p>I understand the center's cancellation and no-show policy and agree to follow it, including any fees that may apply. Cancellations should preferably be made 24 hours prior to the scheduled appointment. If a cancellation is made within 24 hours of the appointment, or in case of a no-show, I may be required to pay a 50% deposit prior to making another appointment. I understand that this deposit will be non-refundable.</p>
+      <h3>8. Consent to Treatment</h3>
+      <p>I acknowledge that I have read and understood this General Consent and Acknowledgment. I have had the opportunity to ask questions, and all my questions have been answered to my satisfaction.</p>
+      <p>I hereby voluntarily consent to receive services at this wellness center, as recommended by the provider, and I understand that I will receive specific information and sign additional consent(s) for certain procedures (such as laser, injectables, or IV therapy).</p>`
+  },
+  es: {
+    hdrTitle:'Consentimiento General<br/>y Reconocimiento',
+    hdrSub:'Por favor complete este formulario antes de su cita. Toda la información se mantiene confidencial y se almacena de forma segura en su perfil de cliente.',
+    lblPersonal:'Información Personal', lblFname:'Nombre', lblLname:'Apellido',
+    lblEmail:'Correo electrónico', lblPhone:'Teléfono', lblService:'Categoría de Servicio',
+    svcPH:'— Seleccione una categoría —', lblConsentHdr:'Consentimiento y Acuerdo',
+    lblScrollHint:'↕ Desplácese para leer el acuerdo completo',
+    lblAgree:'He leído y acepto el Consentimiento General y Reconocimiento anterior.',
+    lblSigHdr:'Firma', lblSigInst:'Por favor firme abajo con su dedo, lápiz óptico o ratón.',
+    lblSignHere:'Firme aquí', lblClear:'Borrar firma', sigErrMsg:'La firma es requerida.',
+    errRequired:'Requerido', errEmail:'Correo electrónico válido requerido',
+    lblDate:'Fecha', lblLoc:'Lugar (opcional)',
+    btnSubmit:'Completar y Descargar Formulario Firmado',
+    sucTitle:'Formulario Completo',
+    sucBody:'Gracias. Su formulario de consentimiento firmado ha sido guardado. Por favor devuelva el dispositivo a nuestro equipo, o descargue una copia para sus registros.',
+    sucBtn:'Descargar Copia en PDF',
+    consent:`
+      <h3>1. Propósito de la Visita</h3>
+      <p>Entiendo que los servicios proporcionados en este centro de bienestar pueden incluir masajes, tratamientos faciales y de la piel, tratamientos láser u otros procedimientos estéticos, tratamientos inyectables (como toxina botulínica) y sueroterapia / terapia intravenosa, entre otros.</p>
+      <p>Entiendo que muchos de estos servicios son electivos y tienen como objetivo promover la relajación, la apariencia y el bienestar general, y no sustituyen la atención médica continua con mi médico.</p>
+      <h3>2. Información Médica y Responsabilidad</h3>
+      <p>Certifico que la información médica y personal que he proporcionado es completa y veraz, incluyendo mis medicamentos, alergias, enfermedades y si estoy embarazada o en período de lactancia.</p>
+      <p>Acepto informar al personal sobre cualquier cambio en mi salud, medicamentos o estado de embarazo antes de cada tratamiento.</p>
+      <h3>3. Riesgos Generales y Ausencia de Garantías</h3>
+      <p>Entiendo que todos los tratamientos pueden implicar riesgos, incluyendo, entre otros, molestias, moretes, enrojecimiento o hinchazón temporal, reacciones alérgicas o de sensibilidad, infección y resultados insatisfactorios.</p>
+      <p>Entiendo que no se puede garantizar un resultado específico y que los resultados pueden variar de una persona a otra.</p>
+      <h3>4. Derecho a Hacer Preguntas y a Negarse</h3>
+      <p>Entiendo que tengo derecho a hacer preguntas sobre mi tratamiento en cualquier momento y a recibir respuestas en un lenguaje que pueda comprender.</p>
+      <p>Entiendo que puedo negarme o suspender cualquier tratamiento en cualquier momento, incluso después de firmar este formulario, y que dicha negativa no afectará mi derecho a recibir atención futura en este centro, excepto cuando un tratamiento específico sea necesario para proceder.</p>
+      <h3>5. Fotografías e Historias Clínicas (Solo Uso Clínico)</h3>
+      <p>Entiendo que el centro puede tomar fotografías clínicas para documentar mi condición antes, durante y después del tratamiento. Estas imágenes se guardarán de forma confidencial en mi expediente y se utilizarán solo con fines clínicos y de control de calidad, a menos que firme una autorización separada para uso con fines de mercadeo o educativos.</p>
+      <h3>6. Privacidad y Comunicación</h3>
+      <p>Autorizo al centro de bienestar a utilizar y divulgar mi información de salud y contacto para fines de tratamiento, facturación y operaciones de atención médica, de acuerdo con las leyes de privacidad aplicables. Entiendo que puedo solicitar límites a ciertos usos y divulgaciones.</p>
+      <p>Autorizo que se comuniquen conmigo por teléfono, mensajes de texto, correo electrónico o aplicaciones de mensajería que proporcione, para recordatorios de citas, seguimientos e información educativa limitada. Entiendo que las comunicaciones electrónicas pueden implicar cierto riesgo de acceso no autorizado.</p>
+      <h3>7. Responsabilidad Económica y Política de Cancelación</h3>
+      <p>Entiendo que soy responsable económicamente de todos los cargos que no estén cubiertos por seguros u otros terceros pagadores, si aplica.</p>
+      <p>Entiendo la política de cancelación y de citas no asistidas del centro y acepto cumplirla, incluyendo cualquier cargo que pueda aplicar. Las cancelaciones deben hacerse preferiblemente con 24 horas de anticipación a la cita programada. Si se realiza una cancelación dentro de las 24 horas previas a la cita, o en caso de no presentarse, se me puede requerir el pago de un depósito del 50% antes de programar otra cita. Entiendo que este depósito no será reembolsable.</p>
+      <h3>8. Consentimiento para Tratamiento</h3>
+      <p>Reconozco que he leído y comprendido este Consentimiento General y Reconocimiento. He tenido la oportunidad de hacer preguntas y todas mis preguntas han sido respondidas a mi entera satisfacción.</p>
+      <p>Por este medio otorgo voluntariamente mi consentimiento para recibir servicios en este centro de bienestar, según lo recomiende el profesional, y entiendo que recibiré información específica y firmaré consentimientos adicionales para ciertos procedimientos (como láser, inyectables o sueroterapia).</p>`
+  }
+};
+
+let lang = 'en';
+
+function setLang(l) {
+  lang = l;
+  const t = T[l];
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  document.getElementById('btn-es').classList.toggle('active', l==='es');
+  document.getElementById('hdr-title').innerHTML        = t.hdrTitle;
+  document.getElementById('hdr-sub').textContent        = t.hdrSub;
+  document.getElementById('lbl-personal').textContent   = t.lblPersonal;
+  document.getElementById('lbl-fname').textContent      = t.lblFname;
+  document.getElementById('lbl-lname').textContent      = t.lblLname;
+  document.getElementById('lbl-email').textContent      = t.lblEmail;
+  document.getElementById('lbl-phone').textContent      = t.lblPhone;
+  document.getElementById('lbl-service').textContent    = t.lblService;
+  document.getElementById('svc-ph').textContent         = t.svcPH;
+  document.getElementById('lbl-consent-hdr').innerHTML  = t.lblConsentHdr;
+  document.getElementById('lbl-scroll-hint').textContent= t.lblScrollHint;
+  document.getElementById('lbl-agree').textContent      = t.lblAgree;
+  document.getElementById('lbl-sig-hdr').textContent    = t.lblSigHdr;
+  document.getElementById('lbl-sig-inst').textContent   = t.lblSigInst;
+  document.getElementById('lbl-sign-here').textContent  = t.lblSignHere;
+  document.getElementById('lbl-clear').textContent      = t.lblClear;
+  document.getElementById('sigError').textContent       = t.sigErrMsg;
+  document.getElementById('err-fname').textContent      = t.errRequired;
+  document.getElementById('err-lname').textContent      = t.errRequired;
+  document.getElementById('err-email').textContent      = t.errEmail;
+  document.getElementById('err-service').textContent    = t.errRequired;
+  document.getElementById('err-date').textContent       = t.errRequired;
+  document.getElementById('lbl-date').textContent       = t.lblDate;
+  document.getElementById('lbl-loc').textContent        = t.lblLoc;
+  document.getElementById('btn-submit-lbl').innerHTML   = t.btnSubmit;
+  document.getElementById('suc-title').textContent      = t.sucTitle;
+  document.getElementById('suc-body').textContent       = t.sucBody;
+  document.getElementById('suc-btn').textContent        = t.sucBtn;
+  document.getElementById('consentBox').innerHTML       = t.consent;
+}
+
+setLang('en');
+document.getElementById('sigDate').value = new Date().toISOString().split('T')[0];
+
+/* ── Signature pad ────────────────────────────────── */
+const canvas = document.getElementById('sigCanvas');
+const ctx    = canvas.getContext('2d');
+let drawing  = false, hasSig = false;
+
+function resizeCanvas() {
+  const r = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width  = rect.width  * r;
+  canvas.height = rect.height * r;
+  ctx.scale(r, r);
+  ctx.strokeStyle = '#2e2e2e';
+  ctx.lineWidth = 1.8;
+  ctx.lineCap = ctx.lineJoin = 'round';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function pos(e) {
+  const r = canvas.getBoundingClientRect();
+  const s = e.touches ? e.touches[0] : e;
+  return { x: s.clientX - r.left, y: s.clientY - r.top };
+}
+canvas.addEventListener('mousedown',  e => { drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
+canvas.addEventListener('mousemove',  e => { if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); markSig(); });
+canvas.addEventListener('mouseup',    ()  => drawing=false);
+canvas.addEventListener('mouseleave', ()  => drawing=false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }, {passive:false});
+canvas.addEventListener('touchmove',  e => { e.preventDefault(); if(!drawing)return; const p=pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); markSig(); }, {passive:false});
+canvas.addEventListener('touchend',   e => { e.preventDefault(); drawing=false; }, {passive:false});
+
+function markSig() {
+  hasSig = true;
+  document.getElementById('sigPlaceholder').style.opacity = '0';
+  document.getElementById('sigError').style.display = 'none';
+}
+function clearSignature() {
+  const r = window.devicePixelRatio || 1;
+  ctx.clearRect(0, 0, canvas.width/r, canvas.height/r);
+  hasSig = false;
+  document.getElementById('sigPlaceholder').style.opacity = '1';
+}
+
+/* ── Validation ───────────────────────────────────── */
+function validate() {
+  let ok = true;
+  function chk(id, fn) {
+    const wrap = document.getElementById('field-'+id);
+    const el   = document.getElementById(id);
+    if (!fn(el.value.trim())) { wrap.classList.add('field-error'); ok=false; }
+    else wrap.classList.remove('field-error');
+  }
+  chk('firstName', v => v.length>0);
+  chk('lastName',  v => v.length>0);
+  chk('email',     v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+  chk('service',   v => v.length>0);
+  chk('sigDate',   v => v.length>0);
+  if (!document.getElementById('agreeCheck').checked) {
+    ok = false;
+    const cb = document.getElementById('agreeCheck');
+    cb.style.outline = '2px solid #c0392b';
+    setTimeout(()=>cb.style.outline='', 2000);
+  }
+  if (!hasSig) { document.getElementById('sigError').style.display='block'; ok=false; }
+  return ok;
+}
+
+/* ── PDF generation ───────────────────────────────── */
+let pdfBlob = null;
+
+function buildPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const t = T[lang];
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName  = document.getElementById('lastName').value.trim();
+  const email     = document.getElementById('email').value.trim();
+  const phone     = document.getElementById('phone').value.trim();
+  const service   = document.getElementById('service').value;
+  const sigDate   = document.getElementById('sigDate').value;
+  const location  = document.getElementById('location').value.trim() || 'San José, Costa Rica';
+  const formatted = new Date(sigDate+'T12:00:00').toLocaleDateString(
+    lang==='es'?'es-CR':'en-US', {year:'numeric',month:'long',day:'numeric'});
+
+  const M=22, W=210;
+  let y=M;
+
+  // Header bar
+  doc.setFillColor(61,107,94);
+  doc.rect(0,0,W,40,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.text('BRISA MEDICAL SPA & WELLNESS CENTER', M, 14);
+  doc.setFontSize(16);
+  doc.text(lang==='es'?'Consentimiento General y Reconocimiento':'General Consent and Acknowledgment', M, 30);
+  doc.setTextColor(40,40,40);
+  y = 52;
+
+  function sectionHead(label) {
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(61,107,94);
+    doc.text(label, M, y); y+=5;
+    doc.setDrawColor(221,213,202); doc.line(M,y,W-M,y); y+=8;
+  }
+  function infoRow(label, value) {
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(120,120,120);
+    doc.text(label, M, y);
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(40,40,40);
+    doc.text(value||'—', M+42, y); y+=9;
+  }
+
+  sectionHead(lang==='es'?'INFORMACIÓN DEL CLIENTE':'CLIENT INFORMATION');
+  infoRow(lang==='es'?'Nombre:':'Full Name:', firstName+' '+lastName);
+  infoRow('Email:', email);
+  infoRow(lang==='es'?'Teléfono:':'Phone:', phone||'—');
+  infoRow(lang==='es'?'Categoría:':'Category:', service);
+  y+=6;
+
+  sectionHead(lang==='es'?'CONSENTIMIENTO Y ACUERDO':'CONSENT & AGREEMENT');
+
+  const sections = lang==='es' ? [
+    ['1. PROPÓSITO DE LA VISITA','Entiendo que los servicios proporcionados en este centro de bienestar pueden incluir masajes, tratamientos faciales y de la piel, tratamientos láser u otros procedimientos estéticos, tratamientos inyectables (como toxina botulínica) y sueroterapia / terapia intravenosa, entre otros. Entiendo que muchos de estos servicios son electivos y tienen como objetivo promover la relajación, la apariencia y el bienestar general, y no sustituyen la atención médica continua con mi médico.'],
+    ['2. INFORMACIÓN MÉDICA Y RESPONSABILIDAD','Certifico que la información médica y personal que he proporcionado es completa y veraz, incluyendo mis medicamentos, alergias, enfermedades y si estoy embarazada o en período de lactancia. Acepto informar al personal sobre cualquier cambio en mi salud, medicamentos o estado de embarazo antes de cada tratamiento.'],
+    ['3. RIESGOS GENERALES Y AUSENCIA DE GARANTÍAS','Entiendo que todos los tratamientos pueden implicar riesgos, incluyendo, entre otros, molestias, moretes, enrojecimiento o hinchazón temporal, reacciones alérgicas o de sensibilidad, infección y resultados insatisfactorios. Entiendo que no se puede garantizar un resultado específico y que los resultados pueden variar de una persona a otra.'],
+    ['4. DERECHO A HACER PREGUNTAS Y A NEGARSE','Entiendo que tengo derecho a hacer preguntas sobre mi tratamiento en cualquier momento y a recibir respuestas en un lenguaje que pueda comprender. Entiendo que puedo negarme o suspender cualquier tratamiento en cualquier momento, incluso después de firmar este formulario, y que dicha negativa no afectará mi derecho a recibir atención futura en este centro.'],
+    ['5. FOTOGRAFÍAS E HISTORIAS CLÍNICAS (SOLO USO CLÍNICO)','Entiendo que el centro puede tomar fotografías clínicas para documentar mi condición antes, durante y después del tratamiento. Estas imágenes se guardarán de forma confidencial en mi expediente y se utilizarán solo con fines clínicos y de control de calidad, a menos que firme una autorización separada para uso con fines de mercadeo o educativos.'],
+    ['6. PRIVACIDAD Y COMUNICACIÓN','Autorizo al centro de bienestar a utilizar y divulgar mi información de salud y contacto para fines de tratamiento, facturación y operaciones de atención médica, de acuerdo con las leyes de privacidad aplicables. Autorizo que se comuniquen conmigo por teléfono, mensajes de texto, correo electrónico o aplicaciones de mensajería que proporcione, para recordatorios de citas y seguimientos.'],
+    ['7. RESPONSABILIDAD ECONÓMICA Y POLÍTICA DE CANCELACIÓN','Entiendo que soy responsable económicamente de todos los cargos que no estén cubiertos por seguros u otros terceros pagadores. Las cancelaciones deben hacerse preferiblemente con 24 horas de anticipación. Si se cancela dentro de las 24 horas previas a la cita, o en caso de no presentarse, se me puede requerir el pago de un depósito del 50% no reembolsable antes de programar otra cita.'],
+    ['8. CONSENTIMIENTO PARA TRATAMIENTO','Reconozco que he leído y comprendido este Consentimiento General y Reconocimiento. He tenido la oportunidad de hacer preguntas y todas mis preguntas han sido respondidas a mi entera satisfacción. Por este medio otorgo voluntariamente mi consentimiento para recibir servicios en este centro de bienestar, según lo recomiende el profesional.'],
+  ] : [
+    ['1. PURPOSE OF VISIT','I understand that the services provided at this wellness center may include massage therapy, skin-care treatments, laser and other aesthetic procedures, injectable treatments (such as botulinum toxin) and IV therapy, among others. Many of these services are elective and are not a substitute for ongoing medical care with my physician.'],
+    ['2. MEDICAL INFORMATION AND RESPONSIBILITY','I certify that the medical and personal information I have provided is complete and accurate, including medications, allergies, medical conditions, and pregnancy or breastfeeding status. I agree to inform the staff of any changes to my health or medications before each treatment.'],
+    ['3. GENERAL RISKS AND NO GUARANTEES','I understand that all treatments may have risks, including but not limited to discomfort, bruising, temporary redness or swelling, allergic or sensitivity reactions, infection, and unsatisfactory results. No specific result can be guaranteed and results may vary from person to person.'],
+    ['4. RIGHT TO ASK QUESTIONS AND TO REFUSE','I understand that I have the right to ask questions about my treatment at any time and may refuse or discontinue any treatment at any time, even after signing this form, without affecting my right to future care at this center.'],
+    ['5. PHOTOGRAPHY AND RECORDS (CLINICAL ONLY)','I understand that the center may take clinical photographs to document my condition before, during, and after treatment. These images will be stored confidentially and used only for clinical and quality-assurance purposes, unless I sign a separate authorization for marketing or educational use.'],
+    ['6. PRIVACY AND COMMUNICATION','I authorize the wellness center to use and disclose my health and contact information for treatment, billing, and healthcare operations, consistent with applicable privacy laws. I consent to be contacted by phone, text, email or messaging apps for appointment reminders and follow-ups.'],
+    ['7. FINANCIAL RESPONSIBILITY AND CANCELLATION POLICY','I am financially responsible for all applicable charges. Cancellations should preferably be made 24 hours prior to the appointment. Cancellations within 24 hours or no-shows may require a non-refundable 50% deposit to reschedule.'],
+    ['8. CONSENT TO TREATMENT','I acknowledge that I have read and understood this General Consent and Acknowledgment, have had the opportunity to ask questions, and hereby voluntarily consent to receive services at this wellness center as recommended by the provider.'],
+  ];
+
+  doc.setFontSize(8.5);
+  for (const [heading, body] of sections) {
+    if (y > 252) { doc.addPage(); y = M; }
+    doc.setFont('helvetica','bold'); doc.setTextColor(61,107,94);
+    doc.text(heading, M, y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setTextColor(70,70,70);
+    const lines = doc.splitTextToSize(body, W-M*2);
+    doc.text(lines, M, y); y += lines.length*4.5+5;
+  }
+
+  // Agreement confirmation
+  y+=4;
+  if (y>260){doc.addPage();y=M;}
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(61,107,94);
+  doc.text(lang==='es'?'✓ Cliente confirmó acuerdo con los términos anteriores.':'✓ Client confirmed agreement to the above terms.', M, y);
+  y+=14;
+
+  // Signature
+  if (y>230){doc.addPage();y=M;}
+  sectionHead(lang==='es'?'FIRMA':'SIGNATURE');
+  doc.setDrawColor(200,200,200); doc.rect(M, y, 100, 35);
+  doc.addImage(canvas.toDataURL('image/png'),'PNG', M, y, 100, 35);
+  y+=40;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(40,40,40);
+  doc.text(firstName+' '+lastName, M, y);
+  doc.text((lang==='es'?'Fecha: ':'Date: ')+formatted, M+110, y);
+  y+=5;
+  doc.text((lang==='es'?'Lugar: ':'Location: ')+location, M, y);
+
+  // Footer
+  doc.setDrawColor(221,213,202); doc.line(M,277,W-M,277);
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(160,160,160);
+  doc.text('Brisa Medical Spa & Wellness Center  ·  '+(lang==='es'?'Firmado digitalmente el ':'Digitally signed on ')+formatted, M, 283);
+
+  return doc;
+}
+
+function submitForm() {
+  if (!validate()) return;
+  pdfBlob = buildPDF().output('blob');
+  document.getElementById('formSection').style.display = 'none';
+  const s = document.getElementById('successScreen');
+  s.style.display = 'flex';
+}
+
+function downloadPDF() {
+  if (!pdfBlob) return;
+  const fn = document.getElementById('firstName').value.trim();
+  const ln = document.getElementById('lastName').value.trim();
+  const url = URL.createObjectURL(pdfBlob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `Brisa-Consent-${fn}-${ln}.pdf`;
+  a.click(); URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
