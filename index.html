@@ -16,8 +16,8 @@
        In Framer: click any colored element → Fill panel → copy hex.
        ═══════════════════════════════════════════════════════ */
     :root {
-      --primary:    #8c7049;
-      --primary-dk: #d3ad78;
+      --primary:    #3d6b5e;
+      --primary-dk: #2c4f45;
       --accent:     #a07850;
       --bg:         #f6f2ed;
       --border:     #ddd5ca;
@@ -139,17 +139,37 @@
 
     /* Success */
     #successScreen { display:none; flex-direction:column; align-items:center;
-      padding:80px 48px; text-align:center; }
+      padding:60px 48px 72px; text-align:center; }
     .success-icon { width:60px; height:60px; border-radius:50%; background:var(--primary);
       display:flex; align-items:center; justify-content:center; margin-bottom:28px; }
     .success-icon svg { width:26px; height:26px; stroke:#fff; fill:none; stroke-width:2.5; }
     #successScreen h2 { font-family:'Cormorant Garamond',serif; font-size:28px;
-      font-weight:300; margin-bottom:12px; }
-    #successScreen p { font-size:14px; color:var(--text-muted); line-height:1.7; max-width:380px; }
-    .btn-download { margin-top:30px; padding:14px 36px; background:var(--primary); color:#fff;
+      font-weight:300; margin-bottom:10px; }
+    #successScreen > p { font-size:14px; color:var(--text-muted); line-height:1.7; max-width:380px; }
+
+    /* Step list */
+    .steps-wrapper { margin:28px 0 4px; width:100%; max-width:400px; text-align:left; }
+    .step-row { display:flex; align-items:flex-start; gap:16px; margin-bottom:20px; }
+    .step-num { width:30px; height:30px; border-radius:50%; background:var(--primary);
+      color:#fff; font-family:'Jost',sans-serif; font-size:13px; font-weight:500;
+      display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px; }
+    .step-text { font-size:13px; line-height:1.6; color:var(--text-muted); }
+    .step-text strong { color:var(--text); font-weight:500; }
+
+    /* Buttons */
+    .btn-download { margin-top:20px; padding:15px 32px; background:var(--primary); color:#fff;
       border:none; border-radius:2px; font-family:'Jost',sans-serif; font-size:11px;
-      letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; transition:background 0.2s; }
+      letter-spacing:0.18em; text-transform:uppercase; cursor:pointer;
+      transition:background 0.2s; width:100%; max-width:360px; }
     .btn-download:hover { background:var(--primary-dk); }
+    .btn-whatsapp { margin-top:12px; padding:15px 32px;
+      background:#25D366; color:#fff;
+      border:none; border-radius:2px; font-family:'Jost',sans-serif; font-size:11px;
+      letter-spacing:0.18em; text-transform:uppercase; cursor:pointer;
+      transition:background 0.2s; width:100%; max-width:360px; }
+    .btn-whatsapp:hover { background:#1da851; }
+    .suc-note { margin-top:22px; font-size:12px; color:var(--text-muted);
+      line-height:1.6; max-width:340px; }
 
     @media (max-width:560px) {
       .card-header,.card-body { padding-left:24px; padding-right:24px; }
@@ -165,7 +185,7 @@
   <!-- Header -->
   <div class="card-header">
     <div class="center-name">Brisa Medical Spa &amp; Wellness Center</div>
-    <h1 id="hdr-title">General Consent &amp; Acknowledgment</h1>
+    <h1 id="hdr-title">General Consent &amp;<br/>Acknowledgment</h1>
     <p id="hdr-sub">Please complete this form before your appointment. All information is kept confidential and stored securely in your client profile.</p>
   </div>
 
@@ -269,7 +289,7 @@
     </div>
 
     <button class="btn-submit" type="button" onclick="submitForm()" id="btn-submit-lbl">
-      Complete &amp; Download Signed Form
+      Complete &amp; Send Signed Form to Brisa
     </button>
 
   </div><!-- /card-body -->
@@ -280,8 +300,37 @@
       <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
     </div>
     <h2 id="suc-title">Form Complete</h2>
-    <p id="suc-body">Thank you. Your signed consent form has been saved. Please hand the device back to our team, or download a copy for your records.</p>
-    <button class="btn-download" onclick="downloadPDF()" id="suc-btn">Download PDF Copy</button>
+    <p id="suc-body">Thank you. Please follow the two steps below to send your signed form to Brisa.</p>
+
+    <!-- Step indicators -->
+    <div class="steps-wrapper">
+      <div class="step-row">
+        <div class="step-num">1</div>
+        <div class="step-text" id="suc-step1">
+          <strong id="suc-step1-title">Download your signed form</strong><br/>
+          <span id="suc-step1-body">Tap the button below — the PDF will save to this device.</span>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-num">2</div>
+        <div class="step-text" id="suc-step2">
+          <strong id="suc-step2-title">Send it to us via WhatsApp</strong><br/>
+          <span id="suc-step2-body">WhatsApp will open pre-addressed to Brisa. Attach the PDF you just downloaded and tap Send.</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-download" onclick="downloadAndWhatsApp()" id="suc-btn">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle;margin-right:8px;margin-bottom:2px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span id="suc-btn-label">Step 1 — Download Signed Form</span>
+    </button>
+
+    <button class="btn-whatsapp" onclick="openWhatsApp()" id="btn-wa">
+      <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:currentColor;vertical-align:middle;margin-right:8px;margin-bottom:2px;" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      <span id="wa-btn-label">Step 2 — Open WhatsApp to Send</span>
+    </button>
+
+    <p class="suc-note" id="suc-note">If WhatsApp doesn't open automatically, send the PDF manually to <strong>+506 6231 2222</strong>.</p>
   </div>
 
 </div><!-- /card -->
@@ -427,10 +476,16 @@ const T = {
     lblSignHere:'Sign here', lblClear:'Clear signature', sigErrMsg:'Signature is required.',
     errRequired:'Required', errEmail:'Valid email required',
     lblDate:'Date', lblLoc:'Location (optional)',
-    btnSubmit:'Complete &amp; Download Signed Form',
+    btnSubmit:'Complete &amp; Send Signed Form to Brisa',
     sucTitle:'Form Complete',
-    sucBody:'Thank you. Your signed consent form has been saved. Please hand the device back to our team, or download a copy for your records.',
-    sucBtn:'Download PDF Copy',
+    sucBody:'Thank you. Please follow the two steps below to send your signed form to Brisa.',
+    sucStep1Title:'Download your signed form',
+    sucStep1Body:'Tap the button below — the PDF will save to this device.',
+    sucStep2Title:'Send it to us via WhatsApp',
+    sucStep2Body:'WhatsApp will open pre-addressed to Brisa. Attach the PDF you just downloaded and tap Send.',
+    sucBtnLabel:'Step 1 — Download Signed Form',
+    waBtnLabel:'Step 2 — Open WhatsApp to Send',
+    sucNote:'If WhatsApp doesn\'t open automatically, send the PDF manually to +506 6231 2222.',
     consent:`
       <h3>1. Purpose of Visit</h3>
       <p>I understand that the services provided at this wellness center may include massage therapy, skin-care treatments, laser and other aesthetic procedures, injectable treatments (such as botulinum toxin), and IV therapy, among others. I understand that many of these services are elective and are intended to promote relaxation, appearance, and general wellness, and are not a substitute for ongoing medical care with my physician.</p>
@@ -470,10 +525,16 @@ const T = {
     lblSignHere:'Firme aquí', lblClear:'Borrar firma', sigErrMsg:'La firma es requerida.',
     errRequired:'Requerido', errEmail:'Correo electrónico válido requerido',
     lblDate:'Fecha', lblLoc:'Lugar (opcional)',
-    btnSubmit:'Completar y Descargar Formulario Firmado',
+    btnSubmit:'Completar y Enviar Formulario Firmado a Brisa',
     sucTitle:'Formulario Completo',
-    sucBody:'Gracias. Su formulario de consentimiento firmado ha sido guardado. Por favor devuelva el dispositivo a nuestro equipo, o descargue una copia para sus registros.',
-    sucBtn:'Descargar Copia en PDF',
+    sucBody:'Gracias. Por favor siga los dos pasos a continuación para enviarnos su formulario firmado.',
+    sucStep1Title:'Descargue su formulario firmado',
+    sucStep1Body:'Toque el botón — el PDF se guardará en este dispositivo.',
+    sucStep2Title:'Envíenoslo por WhatsApp',
+    sucStep2Body:'WhatsApp se abrirá con el número de Brisa ya ingresado. Adjunte el PDF que acaba de descargar y toque Enviar.',
+    sucBtnLabel:'Paso 1 — Descargar Formulario Firmado',
+    waBtnLabel:'Paso 2 — Abrir WhatsApp para Enviar',
+    sucNote:'Si WhatsApp no se abre automáticamente, envíe el PDF manualmente al +506 6231 2222.',
     consent:`
       <h3>1. Propósito de la Visita</h3>
       <p>Entiendo que los servicios proporcionados en este centro de bienestar pueden incluir masajes, tratamientos faciales y de la piel, tratamientos láser u otros procedimientos estéticos, tratamientos inyectables (como toxina botulínica) y sueroterapia / terapia intravenosa, entre otros. Entiendo que muchos de estos servicios son electivos y tienen como objetivo promover la relajación, la apariencia y el bienestar general, y no sustituyen la atención médica continua con mi médico.</p>
@@ -537,7 +598,13 @@ function setLang(l) {
   document.getElementById('btn-submit-lbl').innerHTML    = t.btnSubmit;
   document.getElementById('suc-title').textContent       = t.sucTitle;
   document.getElementById('suc-body').textContent        = t.sucBody;
-  document.getElementById('suc-btn').textContent         = t.sucBtn;
+  document.getElementById('suc-step1-title').textContent = t.sucStep1Title;
+  document.getElementById('suc-step1-body').textContent  = t.sucStep1Body;
+  document.getElementById('suc-step2-title').textContent = t.sucStep2Title;
+  document.getElementById('suc-step2-body').textContent  = t.sucStep2Body;
+  document.getElementById('suc-btn-label').textContent   = t.sucBtnLabel;
+  document.getElementById('wa-btn-label').textContent    = t.waBtnLabel;
+  document.getElementById('suc-note').innerHTML          = t.sucNote;
   document.getElementById('consentBox').innerHTML        = t.consent;
 
   // Update service option labels
@@ -806,14 +873,45 @@ function submitForm() {
   document.getElementById('successScreen').style.display = 'flex';
 }
 
-function downloadPDF() {
+/* ── Step 1: Download the PDF ─────────────────────── */
+function downloadAndWhatsApp() {
   if (!pdfBlob) return;
-  const fn = document.getElementById('firstName').value.trim();
-  const ln = document.getElementById('lastName').value.trim();
+  const fn       = document.getElementById('firstName').value.trim();
+  const ln       = document.getElementById('lastName').value.trim();
+  const filename = `Brisa-Consent-${fn}-${ln}.pdf`;
+
+  // Trigger PDF download
   const url = URL.createObjectURL(pdfBlob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `Brisa-Consent-${fn}-${ln}.pdf`;
-  a.click(); URL.revokeObjectURL(url);
+  const a   = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  // Mark step 1 done visually
+  const btn1 = document.getElementById('suc-btn');
+  btn1.style.background = 'var(--primary-dk)';
+  btn1.innerHTML = '✓ &nbsp;' + (lang==='es' ? 'Formulario Descargado' : 'Form Downloaded');
+  btn1.disabled = true;
+}
+
+/* ── Step 2: Open WhatsApp pre-filled ─────────────── */
+function openWhatsApp() {
+  const fn      = document.getElementById('firstName').value.trim();
+  const ln      = document.getElementById('lastName').value.trim();
+  const svcKey  = document.getElementById('service').value;
+  const svcLabel= T[lang].svcLabels[svcKey] || '';
+  const phone   = '50662312222'; // WhatsApp number without + or spaces
+
+  const msgEN = `Hello Brisa! I have completed my consent form. Please find the signed PDF attached.\n\nClient: ${fn} ${ln}\nService: ${svcLabel}`;
+  const msgES = `¡Hola Brisa! He completado mi formulario de consentimiento. Por favor encuentre el PDF firmado adjunto.\n\nCliente: ${fn} ${ln}\nServicio: ${svcLabel}`;
+  const message = encodeURIComponent(lang === 'es' ? msgES : msgEN);
+
+  // wa.me opens WhatsApp with pre-filled message on both mobile and desktop
+  const waUrl = `https://wa.me/${phone}?text=${message}`;
+  window.open(waUrl, '_blank');
 }
 </script>
 </body>
